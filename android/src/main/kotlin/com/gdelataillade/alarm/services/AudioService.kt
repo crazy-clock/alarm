@@ -2,6 +2,7 @@ package com.gdelataillade.alarm.services
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.media.AudioManager
 import com.gdelataillade.alarm.models.VolumeFadeStep
 import java.util.concurrent.ConcurrentHashMap
 import java.util.Timer
