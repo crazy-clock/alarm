@@ -34,7 +34,7 @@ class AlarmService : Service() {
     private var audioService: AudioService? = null
     private var vibrationService: VibrationService? = null
     private var volumeService: VolumeService? = null
-    private var showSystemUI: Boolean = true
+    private var showSystemUI: Boolean = false
 
     override fun onCreate() {
         super.onCreate()
