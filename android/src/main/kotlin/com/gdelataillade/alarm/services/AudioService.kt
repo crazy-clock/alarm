@@ -51,7 +51,6 @@ class AudioService(private val context: Context) {
 
         try {
             MediaPlayer().apply {
-                setAudioStreamType(AudioManager.STREAM_ALARM) // 设置音频流类型为闹钟流
                 when {
                     adjustedFilePath.startsWith("flutter_assets/") -> {
                         // It's an asset file
