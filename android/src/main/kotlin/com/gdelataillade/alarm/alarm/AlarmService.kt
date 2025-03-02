@@ -165,7 +165,10 @@ class AlarmService : Service() {
 
         // Start vibration if enabled
         if (alarmSettings.vibrate) {
+            Log.d(TAG, "Starting vibration for alarm ID: $id")
             vibrationService?.startVibrating(longArrayOf(0, 500, 500), 1)
+        } else {
+            Log.d(TAG, "Vibration disabled for alarm ID: $id")
         }
 
         // Acquire a wake lock to wake up the device
