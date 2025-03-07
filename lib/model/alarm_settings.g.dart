@@ -20,6 +20,8 @@ AlarmSettings _$AlarmSettingsFromJson(Map<String, dynamic> json) =>
               (v) => VolumeSettings.fromJson(v as Map<String, dynamic>)),
           notificationSettings: $checkedConvert('notificationSettings',
               (v) => NotificationSettings.fromJson(v as Map<String, dynamic>)),
+          voiceTagSettings: $checkedConvert('voiceTagSettings',
+              (v) => VoiceTagSettings.fromJson(v as Map<String, dynamic>)),
           loopAudio: $checkedConvert('loopAudio', (v) => v as bool? ?? true),
           vibrate: $checkedConvert('vibrate', (v) => v as bool? ?? true),
           warningNotificationOnKill: $checkedConvert(
@@ -50,4 +52,5 @@ Map<String, dynamic> _$AlarmSettingsToJson(AlarmSettings instance) =>
       'allowAlarmOverlap': instance.allowAlarmOverlap,
       'iOSBackgroundAudio': instance.iOSBackgroundAudio,
       if (instance.payload case final value?) 'payload': value,
+      'voiceTagSettings': instance.voiceTagSettings.toJson(),
     };

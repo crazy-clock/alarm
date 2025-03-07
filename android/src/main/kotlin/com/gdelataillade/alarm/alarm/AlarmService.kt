@@ -4,6 +4,7 @@ import com.gdelataillade.alarm.services.AudioService
 import com.gdelataillade.alarm.services.AlarmStorage
 import com.gdelataillade.alarm.services.VibrationService
 import com.gdelataillade.alarm.services.VolumeService
+import com.gdelataillade.alarm.services.TTSService
 
 import android.app.Service
 import android.app.PendingIntent
@@ -34,6 +35,7 @@ class AlarmService : Service() {
     private var audioService: AudioService? = null
     private var vibrationService: VibrationService? = null
     private var volumeService: VolumeService? = null
+    private var ttsService: TTSService? = null
     private var showSystemUI: Boolean = false
 
     override fun onCreate() {
@@ -128,6 +130,18 @@ class AlarmService : Service() {
             } else {
                 Log.d(TAG, "Alarm rang notification for $id encountered error in Flutter.")
             }
+        }
+
+        // 如果开启了语音标签，则播放语音标签
+        Log.d(TAG, "Alarm voiceTagSettings for ${alarmSettings.voiceTagSettings}.")
+        if (alarmSettings.voiceTagSettings.enable) {
+            ttsService = TTSService(
+                this,
+                alarmSettings.voiceTagSettings.text,
+                alarmSettings.voiceTagSettings.volume,
+                alarmSettings.voiceTagSettings.speechRate,
+                alarmSettings.voiceTagSettings.pitch
+            )
         }
 
         // Set the volume if specified
@@ -242,6 +256,7 @@ class AlarmService : Service() {
         vibrationService?.stopVibrating()
         volumeService?.restorePreviousVolume(showSystemUI)
         volumeService?.abandonAudioFocus()
+        ttsService?.cleanup()  // 清理 TTS 资源
 
         AlarmRingingLiveData.instance.update(false)
 

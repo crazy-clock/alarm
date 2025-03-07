@@ -26,7 +26,8 @@ data class AlarmSettings(
     val vibrate: Boolean,
     val warningNotificationOnKill: Boolean,
     val androidFullScreenIntent: Boolean,
-    val allowAlarmOverlap: Boolean = false // Defaults to false for backward compatibility
+    val allowAlarmOverlap: Boolean = false, // Defaults to false for backward compatibility
+    val voiceTagSettings: VoiceTagSettings
 ) {
     companion object {
         fun fromWire(e: AlarmSettingsWire): AlarmSettings {
@@ -40,7 +41,8 @@ data class AlarmSettings(
                 e.vibrate,
                 e.warningNotificationOnKill,
                 e.androidFullScreenIntent,
-                e.allowAlarmOverlap
+                e.allowAlarmOverlap,
+                VoiceTagSettings.fromWire(e.voiceTagSettings)
             )
         }
 
@@ -56,6 +58,9 @@ data class AlarmSettings(
             val notificationSettings = jsonObject["notificationSettings"]?.let {
                 Json.decodeFromJsonElement(NotificationSettings.serializer(), it)
             } ?: throw SerializationException("Missing 'notificationSettings'")
+            val voiceTagSettings = jsonObject["voiceTagSettings"]?.let {
+                Json.decodeFromJsonElement(VoiceTagSettings.serializer(), it)
+            } ?: throw SerializationException("Missing 'voiceTagSettings'")
             val loopAudio = jsonObject.primitiveBoolean("loopAudio") ?: throw SerializationException("Missing 'loopAudio'")
             val vibrate = jsonObject.primitiveBoolean("vibrate") ?: throw SerializationException("Missing 'vibrate'")
             val warningNotificationOnKill = jsonObject.primitiveBoolean("warningNotificationOnKill")
@@ -93,7 +98,8 @@ data class AlarmSettings(
                 vibrate = vibrate,
                 warningNotificationOnKill = warningNotificationOnKill,
                 androidFullScreenIntent = androidFullScreenIntent,
-                allowAlarmOverlap = allowAlarmOverlap
+                allowAlarmOverlap = allowAlarmOverlap,
+                voiceTagSettings = voiceTagSettings
             )
         }
     }

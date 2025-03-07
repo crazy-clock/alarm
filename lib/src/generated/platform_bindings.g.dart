@@ -59,6 +59,7 @@ class AlarmSettingsWire {
     required this.androidFullScreenIntent,
     required this.allowAlarmOverlap,
     required this.iOSBackgroundAudio,
+    required this.voiceTagSettings,
   });
 
   int id;
@@ -83,6 +84,8 @@ class AlarmSettingsWire {
 
   bool iOSBackgroundAudio;
 
+  VoiceTagSettingsWire voiceTagSettings;
+
   Object encode() {
     return <Object?>[
       id,
@@ -96,6 +99,7 @@ class AlarmSettingsWire {
       androidFullScreenIntent,
       allowAlarmOverlap,
       iOSBackgroundAudio,
+      voiceTagSettings,
     ];
   }
 
@@ -113,6 +117,7 @@ class AlarmSettingsWire {
       androidFullScreenIntent: result[8]! as bool,
       allowAlarmOverlap: result[9]! as bool,
       iOSBackgroundAudio: result[10]! as bool,
+      voiceTagSettings: result[11]! as VoiceTagSettingsWire,
     );
   }
 }
@@ -179,6 +184,47 @@ class VolumeFadeStepWire {
   }
 }
 
+class VoiceTagSettingsWire {
+  VoiceTagSettingsWire({
+    required this.enable,
+    required this.text,
+    required this.volume,
+    required this.speechRate,
+    required this.pitch,
+  });
+
+  bool enable;
+
+  String text;
+
+  double volume;
+
+  double speechRate;
+
+  double pitch;
+
+  Object encode() {
+    return <Object?>[
+      enable,
+      text,
+      volume,
+      speechRate,
+      pitch,
+    ];
+  }
+
+  static VoiceTagSettingsWire decode(Object result) {
+    result as List<Object?>;
+    return VoiceTagSettingsWire(
+      enable: result[0]! as bool,
+      text: result[1]! as String,
+      volume: result[2]! as double,
+      speechRate: result[3]! as double,
+      pitch: result[4]! as double,
+    );
+  }
+}
+
 class NotificationSettingsWire {
   NotificationSettingsWire({
     required this.title,
@@ -234,8 +280,11 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is VolumeFadeStepWire) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is NotificationSettingsWire) {
+    } else if (value is VoiceTagSettingsWire) {
       buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    } else if (value is NotificationSettingsWire) {
+      buffer.putUint8(134);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -255,6 +304,8 @@ class _PigeonCodec extends StandardMessageCodec {
       case 132:
         return VolumeFadeStepWire.decode(readValue(buffer)!);
       case 133:
+        return VoiceTagSettingsWire.decode(readValue(buffer)!);
+      case 134:
         return NotificationSettingsWire.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

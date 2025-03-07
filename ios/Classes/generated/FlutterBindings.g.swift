@@ -97,6 +97,7 @@ struct AlarmSettingsWire {
   var androidFullScreenIntent: Bool
   var allowAlarmOverlap: Bool
   var iOSBackgroundAudio: Bool
+  var voiceTagSettings: VoiceTagSettingsWire
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -112,6 +113,7 @@ struct AlarmSettingsWire {
     let androidFullScreenIntent = pigeonVar_list[8] as! Bool
     let allowAlarmOverlap = pigeonVar_list[9] as! Bool
     let iOSBackgroundAudio = pigeonVar_list[10] as! Bool
+    let voiceTagSettings = pigeonVar_list[11] as! VoiceTagSettingsWire
 
     return AlarmSettingsWire(
       id: id,
@@ -124,7 +126,8 @@ struct AlarmSettingsWire {
       warningNotificationOnKill: warningNotificationOnKill,
       androidFullScreenIntent: androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap,
-      iOSBackgroundAudio: iOSBackgroundAudio
+      iOSBackgroundAudio: iOSBackgroundAudio,
+      voiceTagSettings: voiceTagSettings
     )
   }
   func toList() -> [Any?] {
@@ -140,6 +143,7 @@ struct AlarmSettingsWire {
       androidFullScreenIntent,
       allowAlarmOverlap,
       iOSBackgroundAudio,
+      voiceTagSettings,
     ]
   }
 }
@@ -201,6 +205,42 @@ struct VolumeFadeStepWire {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
+struct VoiceTagSettingsWire {
+  var enable: Bool
+  var text: String
+  var volume: Double
+  var speechRate: Double
+  var pitch: Double
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> VoiceTagSettingsWire? {
+    let enable = pigeonVar_list[0] as! Bool
+    let text = pigeonVar_list[1] as! String
+    let volume = pigeonVar_list[2] as! Double
+    let speechRate = pigeonVar_list[3] as! Double
+    let pitch = pigeonVar_list[4] as! Double
+
+    return VoiceTagSettingsWire(
+      enable: enable,
+      text: text,
+      volume: volume,
+      speechRate: speechRate,
+      pitch: pitch
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      enable,
+      text,
+      volume,
+      speechRate,
+      pitch,
+    ]
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
 struct NotificationSettingsWire {
   var title: String
   var body: String
@@ -248,6 +288,8 @@ private class FlutterBindingsPigeonCodecReader: FlutterStandardReader {
     case 132:
       return VolumeFadeStepWire.fromList(self.readValue() as! [Any?])
     case 133:
+      return VoiceTagSettingsWire.fromList(self.readValue() as! [Any?])
+    case 134:
       return NotificationSettingsWire.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -269,8 +311,11 @@ private class FlutterBindingsPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? VolumeFadeStepWire {
       super.writeByte(132)
       super.writeValue(value.toList())
-    } else if let value = value as? NotificationSettingsWire {
+    } else if let value = value as? VoiceTagSettingsWire {
       super.writeByte(133)
+      super.writeValue(value.toList())
+    } else if let value = value as? NotificationSettingsWire {
+      super.writeByte(134)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

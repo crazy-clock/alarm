@@ -28,6 +28,7 @@ class AlarmSettingsWire {
     required this.androidFullScreenIntent,
     required this.allowAlarmOverlap,
     required this.iOSBackgroundAudio,
+    required this.voiceTagSettings,
   });
 
   final int id;
@@ -41,6 +42,7 @@ class AlarmSettingsWire {
   final bool androidFullScreenIntent;
   final bool allowAlarmOverlap;
   final bool iOSBackgroundAudio;
+  final VoiceTagSettingsWire voiceTagSettings;
 }
 
 class VolumeSettingsWire {
@@ -65,6 +67,22 @@ class VolumeFadeStepWire {
 
   final int timeMillis;
   final double volume;
+}
+
+class VoiceTagSettingsWire {
+  const VoiceTagSettingsWire({
+    required this.enable,
+    required this.text,
+    required this.volume,
+    required this.speechRate,
+    required this.pitch,
+  });
+
+  final bool enable;
+  final String text;
+  final double volume;
+  final double speechRate;
+  final double pitch;
 }
 
 class NotificationSettingsWire {

@@ -55,6 +55,20 @@ android {
     }
 }
 
+//最外层
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+//获取flutter的sdk路径
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
 dependencies {
     //noinspection v1.1.1 has a bug that prevents native_debug_symbol generation
     //             see: https://issuetracker.google.com/u/0/issues/342671895
@@ -62,4 +76,9 @@ dependencies {
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
     //noinspection GradleDependency: 1.7+ requires Kotlin 2
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'
+
+    compileOnly files("$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar")
+    compileOnly 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.2.0'
 }

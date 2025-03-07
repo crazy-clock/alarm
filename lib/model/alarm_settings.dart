@@ -1,4 +1,5 @@
 import 'package:alarm/alarm.dart';
+import 'package:alarm/model/voice_tag_settings.dart';
 import 'package:alarm/model/volume_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
 import 'package:equatable/equatable.dart';
@@ -18,6 +19,7 @@ class AlarmSettings extends Equatable {
     required this.assetAudioPath,
     required this.volumeSettings,
     required this.notificationSettings,
+    required this.voiceTagSettings,
     this.loopAudio = true,
     this.vibrate = true,
     this.warningNotificationOnKill = true,
@@ -172,6 +174,9 @@ class AlarmSettings extends Equatable {
   /// Caller is responsible for serializing and parsing the payload.
   final String? payload;
 
+  /// 语音标签设置
+  final VoiceTagSettings voiceTagSettings;
+
   /// Converts the `AlarmSettings` instance to a JSON object.
   Map<String, dynamic> toJson() => _$AlarmSettingsToJson(this);
 
@@ -188,6 +193,7 @@ class AlarmSettings extends Equatable {
         androidFullScreenIntent: androidFullScreenIntent,
         allowAlarmOverlap: allowAlarmOverlap,
         iOSBackgroundAudio: iOSBackgroundAudio,
+        voiceTagSettings: voiceTagSettings.toWire(),
       );
 
   /// Creates a copy of `AlarmSettings` but with the given fields replaced with
@@ -212,6 +218,7 @@ class AlarmSettings extends Equatable {
     bool? allowAlarmOverlap,
     bool? iOSBackgroundAudio,
     String? Function()? payload,
+    VoiceTagSettings? voiceTagSettings,
   }) {
     return AlarmSettings(
       id: id ?? this.id,
@@ -228,6 +235,7 @@ class AlarmSettings extends Equatable {
       allowAlarmOverlap: allowAlarmOverlap ?? this.allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio ?? this.iOSBackgroundAudio,
       payload: payload?.call() ?? this.payload,
+      voiceTagSettings: voiceTagSettings ?? this.voiceTagSettings,
     );
   }
 
@@ -245,5 +253,6 @@ class AlarmSettings extends Equatable {
         allowAlarmOverlap,
         iOSBackgroundAudio,
         payload,
+        voiceTagSettings,
       ];
 }
