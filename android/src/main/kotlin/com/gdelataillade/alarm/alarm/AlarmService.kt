@@ -85,6 +85,7 @@ class AlarmService : Service() {
         val alarmSettings: AlarmSettings
         try {
             alarmSettings = Json.decodeFromString<AlarmSettings>(alarmSettingsJson)
+            Log.d(TAG, "Alarm alarmSettings for ${alarmSettings}.")
         } catch (e: Exception) {
             Log.e(TAG, "Cannot parse AlarmSettings from Intent.")
             stopSelf()
@@ -136,7 +137,6 @@ class AlarmService : Service() {
         }
 
         // 如果开启了语音标签，则播放语音标签
-        Log.d(TAG, "Alarm voiceTagSettings for ${alarmSettings.voiceTagSettings}.")
         if (alarmSettings.voiceTagSettings.enable) {
             ttsService = TTSService(
                 this,
