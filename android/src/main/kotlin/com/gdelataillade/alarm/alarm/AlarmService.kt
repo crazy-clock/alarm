@@ -5,6 +5,7 @@ import com.gdelataillade.alarm.services.AlarmStorage
 import com.gdelataillade.alarm.services.VibrationService
 import com.gdelataillade.alarm.services.VolumeService
 import com.gdelataillade.alarm.services.TTSService
+import com.gdelataillade.alarm.services.FlashlightService
 
 import android.app.Service
 import android.app.PendingIntent
@@ -36,6 +37,7 @@ class AlarmService : Service() {
     private var vibrationService: VibrationService? = null
     private var volumeService: VolumeService? = null
     private var ttsService: TTSService? = null
+    private var flashlightService: FlashlightService? = null
     private var showSystemUI: Boolean = false
 
     override fun onCreate() {
@@ -45,6 +47,7 @@ class AlarmService : Service() {
         audioService = AudioService(this)
         vibrationService = VibrationService(this)
         volumeService = VolumeService(this)
+        flashlightService = FlashlightService(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -165,6 +168,11 @@ class AlarmService : Service() {
             }
         }
 
+        // 在播放音频之前打开手电筒
+        if (alarmSettings.flashlight) {
+            flashlightService?.turnOnFlashlight()
+        }
+
         // Play the alarm audio
         audioService?.playAudio(
             id,
@@ -241,6 +249,8 @@ class AlarmService : Service() {
                 stopSelf()
             }
 
+            flashlightService?.turnOffFlashlight()  // 关闭手电筒
+
             stopForeground(true)
         } catch (e: IllegalStateException) {
             Log.e(TAG, "Illegal State: ${e.message}", e)
@@ -257,6 +267,7 @@ class AlarmService : Service() {
         volumeService?.restorePreviousVolume(showSystemUI)
         volumeService?.abandonAudioFocus()
         ttsService?.cleanup()  // 清理 TTS 资源
+        flashlightService?.cleanup()  // 清理 FlashlightService
 
         AlarmRingingLiveData.instance.update(false)
 

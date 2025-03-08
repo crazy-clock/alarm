@@ -27,6 +27,7 @@ class AlarmSettings extends Equatable {
     this.allowAlarmOverlap = false,
     this.iOSBackgroundAudio = true,
     this.payload,
+    this.flashlight = false,
   });
 
   /// Constructs an `AlarmSettings` instance from the given JSON data.
@@ -42,10 +43,7 @@ class AlarmSettings extends Equatable {
 
       final volume = (json['volume'] as num?)?.toDouble();
       final fadeDurationSeconds = (json['fadeDuration'] as num?)?.toDouble();
-      final fadeDurationMillis =
-          (fadeDurationSeconds != null && fadeDurationSeconds > 0)
-              ? (fadeDurationSeconds * 1000).toInt()
-              : null;
+      final fadeDurationMillis = (fadeDurationSeconds != null && fadeDurationSeconds > 0) ? (fadeDurationSeconds * 1000).toInt() : null;
       final volumeEnforced = json['volumeEnforced'] as bool? ?? false;
 
       json['volumeSettings'] = {
@@ -177,6 +175,9 @@ class AlarmSettings extends Equatable {
   /// 语音标签设置
   final VoiceTagSettings voiceTagSettings;
 
+  /// 是否开启手电筒
+  final bool flashlight;
+
   /// Converts the `AlarmSettings` instance to a JSON object.
   Map<String, dynamic> toJson() => _$AlarmSettingsToJson(this);
 
@@ -194,6 +195,7 @@ class AlarmSettings extends Equatable {
         allowAlarmOverlap: allowAlarmOverlap,
         iOSBackgroundAudio: iOSBackgroundAudio,
         voiceTagSettings: voiceTagSettings.toWire(),
+        flashlight: flashlight,
       );
 
   /// Creates a copy of `AlarmSettings` but with the given fields replaced with
@@ -219,6 +221,7 @@ class AlarmSettings extends Equatable {
     bool? iOSBackgroundAudio,
     String? Function()? payload,
     VoiceTagSettings? voiceTagSettings,
+    bool? flashlight,
   }) {
     return AlarmSettings(
       id: id ?? this.id,
@@ -228,14 +231,13 @@ class AlarmSettings extends Equatable {
       notificationSettings: notificationSettings ?? this.notificationSettings,
       loopAudio: loopAudio ?? this.loopAudio,
       vibrate: vibrate ?? this.vibrate,
-      warningNotificationOnKill:
-          warningNotificationOnKill ?? this.warningNotificationOnKill,
-      androidFullScreenIntent:
-          androidFullScreenIntent ?? this.androidFullScreenIntent,
+      warningNotificationOnKill: warningNotificationOnKill ?? this.warningNotificationOnKill,
+      androidFullScreenIntent: androidFullScreenIntent ?? this.androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap ?? this.allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio ?? this.iOSBackgroundAudio,
       payload: payload?.call() ?? this.payload,
       voiceTagSettings: voiceTagSettings ?? this.voiceTagSettings,
+      flashlight: flashlight ?? this.flashlight,
     );
   }
 
@@ -254,5 +256,6 @@ class AlarmSettings extends Equatable {
         iOSBackgroundAudio,
         payload,
         voiceTagSettings,
+        flashlight,
       ];
 }

@@ -98,6 +98,7 @@ struct AlarmSettingsWire {
   var allowAlarmOverlap: Bool
   var iOSBackgroundAudio: Bool
   var voiceTagSettings: VoiceTagSettingsWire
+  var flashlight: Bool
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -114,6 +115,7 @@ struct AlarmSettingsWire {
     let allowAlarmOverlap = pigeonVar_list[9] as! Bool
     let iOSBackgroundAudio = pigeonVar_list[10] as! Bool
     let voiceTagSettings = pigeonVar_list[11] as! VoiceTagSettingsWire
+    let flashlight = pigeonVar_list[12] as! Bool
 
     return AlarmSettingsWire(
       id: id,
@@ -127,7 +129,8 @@ struct AlarmSettingsWire {
       androidFullScreenIntent: androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio,
-      voiceTagSettings: voiceTagSettings
+      voiceTagSettings: voiceTagSettings,
+      flashlight: flashlight
     )
   }
   func toList() -> [Any?] {
@@ -144,6 +147,7 @@ struct AlarmSettingsWire {
       allowAlarmOverlap,
       iOSBackgroundAudio,
       voiceTagSettings,
+      flashlight,
     ]
   }
 }

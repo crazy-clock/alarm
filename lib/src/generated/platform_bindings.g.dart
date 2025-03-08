@@ -60,6 +60,7 @@ class AlarmSettingsWire {
     required this.allowAlarmOverlap,
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
+    required this.flashlight,
   });
 
   int id;
@@ -86,6 +87,8 @@ class AlarmSettingsWire {
 
   VoiceTagSettingsWire voiceTagSettings;
 
+  bool flashlight;
+
   Object encode() {
     return <Object?>[
       id,
@@ -100,6 +103,7 @@ class AlarmSettingsWire {
       allowAlarmOverlap,
       iOSBackgroundAudio,
       voiceTagSettings,
+      flashlight,
     ];
   }
 
@@ -118,6 +122,7 @@ class AlarmSettingsWire {
       allowAlarmOverlap: result[9]! as bool,
       iOSBackgroundAudio: result[10]! as bool,
       voiceTagSettings: result[11]! as VoiceTagSettingsWire,
+      flashlight: result[12]! as bool,
     );
   }
 }

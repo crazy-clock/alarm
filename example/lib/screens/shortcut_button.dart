@@ -14,10 +14,12 @@ class ExampleAlarmHomeShortcutButton extends StatefulWidget {
   final void Function() refreshAlarms;
 
   @override
-  State<ExampleAlarmHomeShortcutButton> createState() => _ExampleAlarmHomeShortcutButtonState();
+  State<ExampleAlarmHomeShortcutButton> createState() =>
+      _ExampleAlarmHomeShortcutButtonState();
 }
 
-class _ExampleAlarmHomeShortcutButtonState extends State<ExampleAlarmHomeShortcutButton> {
+class _ExampleAlarmHomeShortcutButtonState
+    extends State<ExampleAlarmHomeShortcutButton> {
   bool showMenu = false;
 
   Future<void> onPressButton(int delayInHours) async {

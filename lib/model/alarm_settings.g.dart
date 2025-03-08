@@ -33,6 +33,7 @@ AlarmSettings _$AlarmSettingsFromJson(Map<String, dynamic> json) =>
           iOSBackgroundAudio:
               $checkedConvert('iOSBackgroundAudio', (v) => v as bool? ?? true),
           payload: $checkedConvert('payload', (v) => v as String?),
+          flashlight: $checkedConvert('flashlight', (v) => v as bool? ?? false),
         );
         return val;
       },
@@ -53,4 +54,5 @@ Map<String, dynamic> _$AlarmSettingsToJson(AlarmSettings instance) =>
       'iOSBackgroundAudio': instance.iOSBackgroundAudio,
       if (instance.payload case final value?) 'payload': value,
       'voiceTagSettings': instance.voiceTagSettings.toJson(),
+      'flashlight': instance.flashlight,
     };

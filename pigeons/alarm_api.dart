@@ -29,6 +29,7 @@ class AlarmSettingsWire {
     required this.allowAlarmOverlap,
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
+    required this.flashlight,
   });
 
   final int id;
@@ -43,6 +44,7 @@ class AlarmSettingsWire {
   final bool allowAlarmOverlap;
   final bool iOSBackgroundAudio;
   final VoiceTagSettingsWire voiceTagSettings;
+  final bool flashlight;
 }
 
 class VolumeSettingsWire {

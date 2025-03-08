@@ -25,7 +25,8 @@ class VoiceTagSettings extends Equatable {
   });
 
   /// Converts the JSON object to a `VolumeSettings` instance.
-  factory VoiceTagSettings.fromJson(Map<String, dynamic> json) => _$VoiceTagSettingsFromJson(json);
+  factory VoiceTagSettings.fromJson(Map<String, dynamic> json) =>
+      _$VoiceTagSettingsFromJson(json);
 
   /// 是否启用
   final bool enable;

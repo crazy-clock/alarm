@@ -27,7 +27,8 @@ data class AlarmSettings(
     val warningNotificationOnKill: Boolean,
     val androidFullScreenIntent: Boolean,
     val allowAlarmOverlap: Boolean = false, // Defaults to false for backward compatibility
-    val voiceTagSettings: VoiceTagSettings
+    val voiceTagSettings: VoiceTagSettings,
+    val flashlight: Boolean
 ) {
     companion object {
         fun fromWire(e: AlarmSettingsWire): AlarmSettings {
@@ -42,7 +43,8 @@ data class AlarmSettings(
                 e.warningNotificationOnKill,
                 e.androidFullScreenIntent,
                 e.allowAlarmOverlap,
-                VoiceTagSettings.fromWire(e.voiceTagSettings)
+                VoiceTagSettings.fromWire(e.voiceTagSettings),
+                e.flashlight
             )
         }
 
@@ -88,6 +90,9 @@ data class AlarmSettings(
                 )
             }
 
+            // Handle backward compatibility for `flashlight`
+            val flashlight = jsonObject.primitiveBoolean("flashlight") ?: false
+
             return AlarmSettings(
                 id = id,
                 dateTime = Date(dateTimeMillis),
@@ -99,7 +104,8 @@ data class AlarmSettings(
                 warningNotificationOnKill = warningNotificationOnKill,
                 androidFullScreenIntent = androidFullScreenIntent,
                 allowAlarmOverlap = allowAlarmOverlap,
-                voiceTagSettings = voiceTagSettings
+                voiceTagSettings = voiceTagSettings,
+                flashlight = flashlight
             )
         }
     }

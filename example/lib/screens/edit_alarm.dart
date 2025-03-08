@@ -92,7 +92,9 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   }
 
   AlarmSettings buildAlarmSettings() {
-    final id = creating ? DateTime.now().millisecondsSinceEpoch % 10000 + 1 : widget.alarmSettings!.id;
+    final id = creating
+        ? DateTime.now().millisecondsSinceEpoch % 10000 + 1
+        : widget.alarmSettings!.id;
 
     final VolumeSettings volumeSettings;
     if (staircaseFade) {
@@ -163,7 +165,10 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   'Cancel',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.blueAccent),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Colors.blueAccent),
                 ),
               ),
               TextButton(
@@ -172,14 +177,20 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                     ? const CircularProgressIndicator()
                     : Text(
                         'Save',
-                        style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Colors.blueAccent),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge!
+                            .copyWith(color: Colors.blueAccent),
                       ),
               ),
             ],
           ),
           Text(
             getDay(),
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.blueAccent.withValues(alpha: 0.8)),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(color: Colors.blueAccent.withValues(alpha: 0.8)),
           ),
           RawMaterialButton(
             onPressed: pickTime,
@@ -188,7 +199,10 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               margin: const EdgeInsets.all(20),
               child: Text(
                 TimeOfDay.fromDateTime(selectedDateTime).format(context),
-                style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Colors.blueAccent),
+                style: Theme.of(context)
+                    .textTheme
+                    .displayMedium!
+                    .copyWith(color: Colors.blueAccent),
               ),
             ),
           ),
@@ -262,7 +276,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               ),
               Switch(
                 value: volume != null,
-                onChanged: (value) => setState(() => volume = value ? 0.5 : null),
+                onChanged: (value) =>
+                    setState(() => volume = value ? 0.5 : null),
               ),
             ],
           ),
@@ -307,7 +322,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                   ),
                 ),
                 onChanged: (value) => setState(
-                  () => fadeDuration = value != null ? Duration(seconds: value) : null,
+                  () => fadeDuration =
+                      value != null ? Duration(seconds: value) : null,
                 ),
               ),
             ],
@@ -330,7 +346,10 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               onPressed: deleteAlarm,
               child: Text(
                 'Delete Alarm',
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Colors.red),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.red),
               ),
             ),
           const SizedBox(),
