@@ -117,7 +117,7 @@ class AlarmApiImpl(private val context: Context) : AlarmApi {
         val alarmIntent = createAlarmIntent(alarm)
         val delayInSeconds = (alarm.dateTime.time - System.currentTimeMillis()) / 1000
 
-        if (delayInSeconds <= 5) {
+        if (delayInSeconds <= 2) {
             handleImmediateAlarm(alarmIntent, delayInSeconds.toInt())
         } else {
             handleDelayedAlarm(
