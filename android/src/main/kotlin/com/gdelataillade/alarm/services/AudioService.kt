@@ -1,6 +1,7 @@
 package com.gdelataillade.alarm.services
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.AudioManager
 import com.gdelataillade.alarm.models.VolumeFadeStep
@@ -38,9 +39,14 @@ class AudioService(private val context: Context) {
         filePath: String,
         loopAudio: Boolean,
         fadeDuration: Duration?,
-        fadeSteps: List<VolumeFadeStep>
+        fadeSteps: List<VolumeFadeStep>,
+        volume: Double?
     ) {
         stopAudio(id) // Stop and release any existing MediaPlayer and Timer for this ID
+        if (volume != null && volume <= 0) {
+            Log.d(TAG, "AudioService playAudio, volume = 0, just stop the audio")
+            return
+        }
 
         val baseAppFlutterPath = context.filesDir.parent?.plus("/app_flutter/")
         val adjustedFilePath = when {
@@ -51,6 +57,12 @@ class AudioService(private val context: Context) {
 
         try {
             MediaPlayer().apply {
+                // 设置音频流类型为警报流
+                val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                setAudioAttributes(audioAttributes)
                 when {
                     adjustedFilePath.startsWith("flutter_assets/") -> {
                         // It's an asset file

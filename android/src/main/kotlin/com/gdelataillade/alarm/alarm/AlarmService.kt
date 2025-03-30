@@ -179,7 +179,9 @@ class AlarmService : Service() {
             alarmSettings.assetAudioPath,
             alarmSettings.loopAudio,
             alarmSettings.volumeSettings.fadeDuration,
-            alarmSettings.volumeSettings.fadeSteps
+            alarmSettings.volumeSettings.fadeSteps,
+            // 这里传入 volume，用于控制铃声暂停，在闹钟挑战时会把 volume 设置为 0
+            alarmSettings.volumeSettings.volume
         )
 
         // Update the list of ringing alarms

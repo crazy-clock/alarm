@@ -7,6 +7,8 @@ import android.media.AudioFocusRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import com.gdelataillade.alarm.alarm.AlarmService
+import com.gdelataillade.alarm.alarm.AlarmService.Companion
 import kotlin.math.round
 import io.flutter.Log
 
@@ -26,6 +28,7 @@ class VolumeService(context: Context) {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
         previousVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
         targetVolume = (round(volume * maxVolume)).toInt()
+        Log.d(TAG, "VolumeService setVolume volume:$volume, targetVolume:$targetVolume.")
         audioManager.setStreamVolume(
             AudioManager.STREAM_ALARM,
             targetVolume,
