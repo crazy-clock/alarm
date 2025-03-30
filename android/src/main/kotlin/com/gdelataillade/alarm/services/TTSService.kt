@@ -33,7 +33,7 @@ class TTSService(
 
     private fun initTTS() {
         // 保存当前媒体音量
-        originalMusicVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+        originalMusicVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
 
         tts = TextToSpeech(context) { status ->
             Log.d(TAG, "TTS initializing status: $status")
@@ -66,8 +66,8 @@ class TTSService(
         tts?.setPitch(pitch.toFloat())
 
         // 设置媒体音量为指定音量
-        val maxMusicVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (maxMusicVolume * volume).toInt(), 0)
+        val maxMusicVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (maxMusicVolume * volume).toInt(), 0)
 
         // 添加完成监听器，在 TTS 播放完成后恢复原来的媒体音量
         tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
@@ -76,13 +76,13 @@ class TTSService(
             override fun onDone(utteranceId: String?) {
                 if (utteranceId == "TTS_DONE") {
                     // 恢复原来的媒体音量
-                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalMusicVolume, 0)
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
                 }
             }
 
             override fun onError(utteranceId: String?) {
                 // 发生错误时也恢复原来的媒体音量
-                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalMusicVolume, 0)
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
             }
         })
 
@@ -100,7 +100,7 @@ class TTSService(
 
     fun cleanup() {
         // 确保恢复原来的媒体音量
-        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalMusicVolume, 0)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
         tts?.stop()
         tts?.shutdown()
         tts = null
