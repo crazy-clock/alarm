@@ -17,7 +17,9 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.PowerManager
 import android.os.Build
+import com.gdelataillade.alarm.generated.EditRingingAlarmSettingsWire
 import com.gdelataillade.alarm.models.AlarmSettings
+import com.gdelataillade.alarm.models.EditRingingAlarmSettings
 import com.gdelataillade.alarm.services.AlarmRingingLiveData
 import com.gdelataillade.alarm.services.NotificationHandler
 import io.flutter.Log
@@ -219,6 +221,53 @@ class AlarmService : Service() {
         if (alarmId == 0) return
         unsaveAlarm(alarmId)
     }
+
+    /**
+     * 仅修改响铃中闹钟的表现： 开始或者暂停 ： 铃声/震动/手电筒
+     */
+    fun editRingingAlarm(settings: EditRingingAlarmSettings) {
+        val id = settings.id
+        Log.d(TAG, "[EditRingingAlarm] Starting EDIT ID: $id")
+        // 1. 震动
+        if (settings.vibrate != null) {
+            if (settings.vibrate) {
+                Log.d(TAG, "[EditRingingAlarm] Starting vibration for alarm ID: $id")
+                vibrationService?.startVibrating(longArrayOf(0, 500, 500), 1)
+            } else {
+                Log.d(TAG, "[EditRingingAlarm] Stop vibration for alarm ID: $id")
+                vibrationService?.stopVibrating()
+            }
+        }
+
+        // 2. 手电筒
+        if (settings.flashlight != null) {
+            if (settings.flashlight) {
+                Log.d(TAG, "[EditRingingAlarm] Starting flashlight for alarm ID: $id")
+                flashlightService?.turnOnFlashlight()
+            } else {
+                Log.d(TAG, "[EditRingingAlarm] Stop flashlight for alarm ID: $id")
+                flashlightService?.turnOffFlashlight()
+            }
+        }
+
+        // 3. 铃声
+        if (settings.volumeSettings != null) {
+            // Play the alarm audio
+            audioService?.playAudio(
+                id,
+                settings.assetAudioPath!!,
+                settings.loopAudio!!,
+                settings.volumeSettings.fadeDuration,
+                settings.volumeSettings.fadeSteps,
+                // 这里传入 volume，用于控制铃声暂停，在闹钟挑战时会把 volume 设置为 0
+                settings.volumeSettings.volume
+            )
+        }
+
+
+    }
+
+
 
     private fun unsaveAlarm(id: Int) {
         AlarmStorage(this).unsaveAlarm(id)

@@ -31,7 +31,7 @@ class FlashlightService(private val context: Context) {
         try {
             cameraId?.let { id ->
                 cameraManager?.setTorchMode(id, true)
-                flashEnabled = true
+                //flashEnabled = true
                 Log.d(TAG, "Flashlight turned on")
             }
         } catch (e: Exception) {
@@ -41,13 +41,13 @@ class FlashlightService(private val context: Context) {
 
     fun turnOffFlashlight() {
         try {
-            if (flashEnabled) {
+            //if (flashEnabled) {
                 cameraId?.let { id ->
                     cameraManager?.setTorchMode(id, false)
-                    flashEnabled = false
+                    //flashEnabled = false
                     Log.d(TAG, "Flashlight turned off")
                 }
-            }
+            //}
         } catch (e: Exception) {
             Log.e(TAG, "Failed to turn off flashlight: ${e.message}")
         }

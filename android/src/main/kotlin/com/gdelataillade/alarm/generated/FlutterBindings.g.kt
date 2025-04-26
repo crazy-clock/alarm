@@ -64,7 +64,9 @@ enum class AlarmErrorCode(val raw: Int) {
    * Please use an external permission manager such as "permission_handler" to
    * request the permission from the user.
    */
-  MISSING_NOTIFICATION_PERMISSION(4);
+  MISSING_NOTIFICATION_PERMISSION(4),
+  /** not support */
+  NOT_SUPPORT(5);
 
   companion object {
     fun ofRaw(raw: Int): AlarmErrorCode? {
@@ -231,6 +233,39 @@ data class NotificationSettingsWire (
     )
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class EditRingingAlarmSettingsWire (
+  val id: Long,
+  val volumeSettings: VolumeSettingsWire? = null,
+  val loopAudio: Boolean? = null,
+  val assetAudioPath: String? = null,
+  val vibrate: Boolean? = null,
+  val flashlight: Boolean? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): EditRingingAlarmSettingsWire {
+      val id = pigeonVar_list[0] as Long
+      val volumeSettings = pigeonVar_list[1] as VolumeSettingsWire?
+      val loopAudio = pigeonVar_list[2] as Boolean?
+      val assetAudioPath = pigeonVar_list[3] as String?
+      val vibrate = pigeonVar_list[4] as Boolean?
+      val flashlight = pigeonVar_list[5] as Boolean?
+      return EditRingingAlarmSettingsWire(id, volumeSettings, loopAudio, assetAudioPath, vibrate, flashlight)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      volumeSettings,
+      loopAudio,
+      assetAudioPath,
+      vibrate,
+      flashlight,
+    )
+  }
+}
 private open class FlutterBindingsPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -264,6 +299,11 @@ private open class FlutterBindingsPigeonCodec : StandardMessageCodec() {
           NotificationSettingsWire.fromList(it)
         }
       }
+      135.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          EditRingingAlarmSettingsWire.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -293,6 +333,10 @@ private open class FlutterBindingsPigeonCodec : StandardMessageCodec() {
         stream.write(134)
         writeValue(stream, value.toList())
       }
+      is EditRingingAlarmSettingsWire -> {
+        stream.write(135)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -306,6 +350,8 @@ interface AlarmApi {
   fun isRinging(alarmId: Long?): Boolean
   fun setWarningNotificationOnKill(title: String, body: String)
   fun disableWarningNotificationOnKill()
+  /** 修改响铃中的闹钟表现（开关：震动/响铃/手电筒等） */
+  fun editRingingAlarm(editRingingAlarmSettingsWire: EditRingingAlarmSettingsWire)
 
   companion object {
     /** The codec used by AlarmApi. */
@@ -410,6 +456,24 @@ interface AlarmApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.disableWarningNotificationOnKill()
+              listOf(null)
+            } catch (exception: Throwable) {
+              wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.alarm.AlarmApi.editRingingAlarm$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val editRingingAlarmSettingsWireArg = args[0] as EditRingingAlarmSettingsWire
+            val wrapped: List<Any?> = try {
+              api.editRingingAlarm(editRingingAlarmSettingsWireArg)
               listOf(null)
             } catch (exception: Throwable) {
               wrapError(exception)

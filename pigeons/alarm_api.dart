@@ -119,6 +119,33 @@ enum AlarmErrorCode {
   /// Please use an external permission manager such as "permission_handler" to
   /// request the permission from the user.
   missingNotificationPermission,
+
+  /// not support
+  notSupport,
+}
+
+class EditRingingAlarmSettingsWire {
+  const EditRingingAlarmSettingsWire({
+    required this.id,
+
+    /// 铃声相关
+    required this.volumeSettings,
+    required this.loopAudio,
+    required this.assetAudioPath,
+
+    /// 震动
+    required this.vibrate,
+
+    /// 手电筒
+    required this.flashlight,
+  });
+
+  final int id;
+  final VolumeSettingsWire? volumeSettings;
+  final bool? loopAudio;
+  final String? assetAudioPath;
+  final bool? vibrate;
+  final bool? flashlight;
 }
 
 @HostApi()
@@ -137,6 +164,10 @@ abstract class AlarmApi {
   });
 
   void disableWarningNotificationOnKill();
+
+  /// 修改响铃中的闹钟表现（开关：震动/响铃/手电筒等）
+  void editRingingAlarm(
+      {required EditRingingAlarmSettingsWire editRingingAlarmSettingsWire});
 }
 
 @FlutterApi()

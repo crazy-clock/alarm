@@ -4,6 +4,7 @@
 import 'dart:async';
 
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:alarm/model/edit_ringing_alarm_settings.dart';
 import 'package:alarm/service/alarm_storage.dart';
 import 'package:alarm/src/alarm_trigger_api_impl.dart';
 import 'package:alarm/src/android_alarm.dart';
@@ -94,17 +95,14 @@ class Alarm {
     final alarms = await getAlarms();
 
     for (final alarm in alarms) {
-      if (alarm.id == alarmSettings.id ||
-          alarm.dateTime.isSameSecond(alarmSettings.dateTime)) {
+      if (alarm.id == alarmSettings.id || alarm.dateTime.isSameSecond(alarmSettings.dateTime)) {
         await Alarm.stop(alarm.id);
       }
     }
 
     await AlarmStorage.saveAlarm(alarmSettings);
 
-    final success = iOS
-        ? await IOSAlarm.setAlarm(alarmSettings)
-        : await AndroidAlarm.set(alarmSettings);
+    final success = iOS ? await IOSAlarm.setAlarm(alarmSettings) : await AndroidAlarm.set(alarmSettings);
 
     if (success) {
       _scheduled.add(_scheduled.value.add(alarmSettings));
@@ -126,16 +124,14 @@ class Alarm {
     if (alarmSettings.id > 2147483647) {
       throw AlarmException(
         AlarmErrorCode.invalidArguments,
-        message:
-            'Alarm id cannot be set larger than Int max value (2147483647). '
+        message: 'Alarm id cannot be set larger than Int max value (2147483647). '
             'Provided: ${alarmSettings.id}',
       );
     }
     if (alarmSettings.id < -2147483648) {
       throw AlarmException(
         AlarmErrorCode.invalidArguments,
-        message:
-            'Alarm id cannot be set smaller than Int min value (-2147483648). '
+        message: 'Alarm id cannot be set smaller than Int min value (-2147483648). '
             'Provided: ${alarmSettings.id}',
       );
     }
@@ -163,8 +159,7 @@ class Alarm {
     await AlarmStorage.unsaveAlarm(id);
     updateStream.add(id);
 
-    final success =
-        iOS ? await IOSAlarm.stopAlarm(id) : await AndroidAlarm.stop(id);
+    final success = iOS ? await IOSAlarm.stopAlarm(id) : await AndroidAlarm.stop(id);
 
     if (success) {
       _scheduled.add(_scheduled.value.removeById(id));
@@ -196,8 +191,7 @@ class Alarm {
   /// If an `id` is provided, it checks if the specific alarm with that `id`
   /// is ringing.
   static Future<bool> isRinging([int? id]) async {
-    final isRinging =
-        iOS ? await IOSAlarm.isRinging(id) : await AndroidAlarm.isRinging(id);
+    final isRinging = iOS ? await IOSAlarm.isRinging(id) : await AndroidAlarm.isRinging(id);
 
     // Defensive programming: check if the stream status matches the platform
     // reported status.
@@ -239,8 +233,7 @@ class Alarm {
   }
 
   /// Returns all the alarms.
-  static Future<List<AlarmSettings>> getAlarms() =>
-      AlarmStorage.getSavedAlarms();
+  static Future<List<AlarmSettings>> getAlarms() => AlarmStorage.getSavedAlarms();
 
   static void _alarmRang(AlarmSettings alarm) {
     _scheduled.add(_scheduled.value.remove(alarm));
@@ -257,5 +250,17 @@ class Alarm {
     _ringing.add(_ringing.value.removeById(alarmId));
 
     updateStream.add(alarmId);
+  }
+
+  /// Whether the alarm is ringing.
+  ///
+  /// If no `id` is provided, it checks if any alarm is ringing.
+  /// If an `id` is provided, it checks if the specific alarm with that `id`
+  /// is ringing.
+  static Future<void> editRingingAlarm({required EditRingingAlarmSettings editRingingAlarmSettings}) async {
+    if (iOS) {
+      throw const AlarmException(AlarmErrorCode.notSupport, message: '暂不支持 IOS');
+    }
+    await AndroidAlarm.editRingingAlarm(editRingingAlarmSettings);
   }
 }

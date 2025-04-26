@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
+import 'package:alarm/model/edit_ringing_alarm_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
 import 'package:alarm/utils/alarm_exception.dart';
 import 'package:alarm/utils/alarm_handler.dart';
@@ -75,4 +76,10 @@ class AndroidAlarm {
   static Future<void> disableWarningNotificationOnKill() => _api
       .disableWarningNotificationOnKill()
       .catchError(AlarmExceptionHandlers.catchError<void>);
+
+  /// 修改响铃中的闹钟表现（开关：震动/响铃/手电筒等）
+  static Future<void> editRingingAlarm(EditRingingAlarmSettings settings) =>
+      _api
+          .editRingingAlarm(editRingingAlarmSettingsWire: settings.toWire())
+          .catchError(AlarmExceptionHandlers.catchError<void>);
 }

@@ -44,6 +44,9 @@ enum AlarmErrorCode {
   /// Please use an external permission manager such as "permission_handler" to
   /// request the permission from the user.
   missingNotificationPermission,
+
+  /// not support
+  notSupport,
 }
 
 class AlarmSettingsWire {
@@ -266,6 +269,52 @@ class NotificationSettingsWire {
   }
 }
 
+class EditRingingAlarmSettingsWire {
+  EditRingingAlarmSettingsWire({
+    required this.id,
+    this.volumeSettings,
+    this.loopAudio,
+    this.assetAudioPath,
+    this.vibrate,
+    this.flashlight,
+  });
+
+  int id;
+
+  VolumeSettingsWire? volumeSettings;
+
+  bool? loopAudio;
+
+  String? assetAudioPath;
+
+  bool? vibrate;
+
+  bool? flashlight;
+
+  Object encode() {
+    return <Object?>[
+      id,
+      volumeSettings,
+      loopAudio,
+      assetAudioPath,
+      vibrate,
+      flashlight,
+    ];
+  }
+
+  static EditRingingAlarmSettingsWire decode(Object result) {
+    result as List<Object?>;
+    return EditRingingAlarmSettingsWire(
+      id: result[0]! as int,
+      volumeSettings: result[1] as VolumeSettingsWire?,
+      loopAudio: result[2] as bool?,
+      assetAudioPath: result[3] as String?,
+      vibrate: result[4] as bool?,
+      flashlight: result[5] as bool?,
+    );
+  }
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -291,6 +340,9 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is NotificationSettingsWire) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
+    } else if (value is EditRingingAlarmSettingsWire) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -312,6 +364,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return VoiceTagSettingsWire.decode(readValue(buffer)!);
       case 134:
         return NotificationSettingsWire.decode(readValue(buffer)!);
+      case 135:
+        return EditRingingAlarmSettingsWire.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -469,6 +523,33 @@ class AlarmApi {
     );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(null) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// 修改响铃中的闹钟表现（开关：震动/响铃/手电筒等）
+  Future<void> editRingingAlarm(
+      {required EditRingingAlarmSettingsWire
+          editRingingAlarmSettingsWire}) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.alarm.AlarmApi.editRingingAlarm$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList = await pigeonVar_channel
+        .send(<Object?>[editRingingAlarmSettingsWire]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);
     } else if (pigeonVar_replyList.length > 1) {

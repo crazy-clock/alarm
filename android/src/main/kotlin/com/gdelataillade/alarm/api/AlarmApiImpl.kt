@@ -12,7 +12,9 @@ import android.os.Looper
 import com.gdelataillade.alarm.alarm.AlarmPlugin
 import com.gdelataillade.alarm.alarm.AlarmReceiver
 import com.gdelataillade.alarm.alarm.AlarmService
+import com.gdelataillade.alarm.generated.EditRingingAlarmSettingsWire
 import com.gdelataillade.alarm.models.AlarmSettings
+import com.gdelataillade.alarm.models.EditRingingAlarmSettings
 import com.gdelataillade.alarm.services.AlarmStorage
 import com.gdelataillade.alarm.services.NotificationOnKillService
 import io.flutter.Log
@@ -108,9 +110,19 @@ class AlarmApiImpl(private val context: Context) : AlarmApi {
         disableWarningNotificationOnKill(context)
     }
 
+    override fun editRingingAlarm(editRingingAlarmSettingsWire: EditRingingAlarmSettingsWire) {
+        // 转换为内部类型
+        val settings = EditRingingAlarmSettings.fromWire(editRingingAlarmSettingsWire)
+        // 通过实例直接调用
+        AlarmService.instance?.let { service ->
+            service.editRingingAlarm(settings)
+            return
+        }
+    }
+
     fun setAlarm(alarm: AlarmSettings) {
         if (alarmIds.contains(alarm.id)) {
-            Log.w("AlarmPlugin", "Stopping alarm with identical ID=${alarm.id} before scheduling a new one.")
+            Log.d("AlarmPlugin", "Stopping alarm with identical ID=${alarm.id} before scheduling a new one.")
             stopAlarm(alarm.id.toLong())
         }
 
