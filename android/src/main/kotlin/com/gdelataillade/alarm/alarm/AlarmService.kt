@@ -230,38 +230,50 @@ class AlarmService : Service() {
         Log.d(TAG, "[EditRingingAlarm] Starting EDIT ID: $id")
         // 1. 震动
         if (settings.vibrate != null) {
-            if (settings.vibrate) {
-                Log.d(TAG, "[EditRingingAlarm] Starting vibration for alarm ID: $id")
-                vibrationService?.startVibrating(longArrayOf(0, 500, 500), 1)
-            } else {
-                Log.d(TAG, "[EditRingingAlarm] Stop vibration for alarm ID: $id")
-                vibrationService?.stopVibrating()
+            try {
+                if (settings.vibrate) {
+                    Log.d(TAG, "[EditRingingAlarm] Starting vibration for alarm ID: $id")
+                    vibrationService?.startVibrating(longArrayOf(0, 500, 500), 1)
+                } else {
+                    Log.d(TAG, "[EditRingingAlarm] Stop vibration for alarm ID: $id")
+                    vibrationService?.stopVibrating()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "[EditRingingAlarm] vibrate error. ${e.message}")
             }
         }
 
         // 2. 手电筒
         if (settings.flashlight != null) {
-            if (settings.flashlight) {
-                Log.d(TAG, "[EditRingingAlarm] Starting flashlight for alarm ID: $id")
-                flashlightService?.turnOnFlashlight()
-            } else {
-                Log.d(TAG, "[EditRingingAlarm] Stop flashlight for alarm ID: $id")
-                flashlightService?.turnOffFlashlight()
+            try {
+                if (settings.flashlight) {
+                    Log.d(TAG, "[EditRingingAlarm] Starting flashlight for alarm ID: $id")
+                    flashlightService?.turnOnFlashlight()
+                } else {
+                    Log.d(TAG, "[EditRingingAlarm] Stop flashlight for alarm ID: $id")
+                    flashlightService?.turnOffFlashlight()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "[EditRingingAlarm] flashlight error. ${e.message}")
             }
         }
 
         // 3. 铃声
         if (settings.volumeSettings != null) {
-            // Play the alarm audio
-            audioService?.playAudio(
-                id,
-                settings.assetAudioPath!!,
-                settings.loopAudio!!,
-                settings.volumeSettings.fadeDuration,
-                settings.volumeSettings.fadeSteps,
-                // 这里传入 volume，用于控制铃声暂停，在闹钟挑战时会把 volume 设置为 0
-                settings.volumeSettings.volume
-            )
+            try {
+                // Play the alarm audio
+                audioService?.playAudio(
+                    id,
+                    settings.assetAudioPath!!,
+                    settings.loopAudio!!,
+                    settings.volumeSettings.fadeDuration,
+                    settings.volumeSettings.fadeSteps,
+                    // 这里传入 volume，用于控制铃声暂停，在闹钟挑战时会把 volume 设置为 0
+                    settings.volumeSettings.volume
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "[EditRingingAlarm] audio error. ${e.message}")
+            }
         }
 
 
