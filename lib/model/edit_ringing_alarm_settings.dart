@@ -1,3 +1,4 @@
+import 'package:alarm/model/voice_tag_settings.dart';
 import 'package:alarm/model/volume_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
 import 'package:equatable/equatable.dart';
@@ -16,6 +17,7 @@ class EditRingingAlarmSettings extends Equatable {
     this.assetAudioPath,
     this.vibrate,
     this.flashlight,
+    this.voiceTagSettings,
   });
 
   const EditRingingAlarmSettings._({
@@ -25,6 +27,7 @@ class EditRingingAlarmSettings extends Equatable {
     this.assetAudioPath,
     this.vibrate,
     this.flashlight,
+    this.voiceTagSettings,
   });
 
   /// Converts the JSON object to a `EditRingingAlarmSettings` instance.
@@ -48,11 +51,14 @@ class EditRingingAlarmSettings extends Equatable {
   /// 是否开启手电筒
   final bool? flashlight;
 
+  /// 语音标签设置
+  final VoiceTagSettings? voiceTagSettings;
+
   /// Converts the [EditRingingAlarmSettings] instance to a JSON object.
   Map<String, dynamic> toJson() => _$EditRingingAlarmSettingsToJson(this);
 
   @override
-  List<Object?> get props => [id, volumeSettings, assetAudioPath, loopAudio, vibrate, flashlight];
+  List<Object?> get props => [id, volumeSettings, assetAudioPath, loopAudio, vibrate, flashlight, voiceTagSettings];
 
   /// Converts to wire datatype which is used for host platform communication.
   EditRingingAlarmSettingsWire toWire() => EditRingingAlarmSettingsWire(
@@ -62,5 +68,6 @@ class EditRingingAlarmSettings extends Equatable {
         loopAudio: loopAudio,
         vibrate: vibrate,
         flashlight: flashlight,
+        voiceTagSettings: voiceTagSettings?.toWire(),
       );
 }

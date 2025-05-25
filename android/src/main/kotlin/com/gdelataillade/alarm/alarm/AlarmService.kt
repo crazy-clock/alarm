@@ -276,6 +276,20 @@ class AlarmService : Service() {
             }
         }
 
+        // 4. 语音标签
+        if (settings.voiceTagSettings != null) {
+            try {
+                ttsService = TTSService(
+                    this,
+                    settings.voiceTagSettings.text,
+                    settings.voiceTagSettings.volume,
+                    settings.voiceTagSettings.speechRate,
+                    settings.voiceTagSettings.pitch
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "[EditRingingAlarm] audio error. ${e.message}")
+            }
+        }
 
     }
 

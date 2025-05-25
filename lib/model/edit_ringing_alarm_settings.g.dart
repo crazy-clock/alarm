@@ -24,6 +24,11 @@ EditRingingAlarmSettings _$EditRingingAlarmSettingsFromJson(
               $checkedConvert('assetAudioPath', (v) => v as String?),
           vibrate: $checkedConvert('vibrate', (v) => v as bool?),
           flashlight: $checkedConvert('flashlight', (v) => v as bool?),
+          voiceTagSettings: $checkedConvert(
+              'voiceTagSettings',
+              (v) => v == null
+                  ? null
+                  : VoiceTagSettings.fromJson(v as Map<String, dynamic>)),
         );
         return val;
       },
@@ -39,4 +44,6 @@ Map<String, dynamic> _$EditRingingAlarmSettingsToJson(
       if (instance.loopAudio case final value?) 'loopAudio': value,
       if (instance.vibrate case final value?) 'vibrate': value,
       if (instance.flashlight case final value?) 'flashlight': value,
+      if (instance.voiceTagSettings?.toJson() case final value?)
+        'voiceTagSettings': value,
     };

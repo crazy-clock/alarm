@@ -138,6 +138,9 @@ class EditRingingAlarmSettingsWire {
 
     /// 手电筒
     required this.flashlight,
+
+    /// 语音标签
+    required this.voiceTagSettings,
   });
 
   final int id;
@@ -146,6 +149,7 @@ class EditRingingAlarmSettingsWire {
   final String? assetAudioPath;
   final bool? vibrate;
   final bool? flashlight;
+  final VoiceTagSettingsWire? voiceTagSettings;
 }
 
 @HostApi()

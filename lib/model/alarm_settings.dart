@@ -43,7 +43,10 @@ class AlarmSettings extends Equatable {
 
       final volume = (json['volume'] as num?)?.toDouble();
       final fadeDurationSeconds = (json['fadeDuration'] as num?)?.toDouble();
-      final fadeDurationMillis = (fadeDurationSeconds != null && fadeDurationSeconds > 0) ? (fadeDurationSeconds * 1000).toInt() : null;
+      final fadeDurationMillis =
+          (fadeDurationSeconds != null && fadeDurationSeconds > 0)
+              ? (fadeDurationSeconds * 1000).toInt()
+              : null;
       final volumeEnforced = json['volumeEnforced'] as bool? ?? false;
 
       json['volumeSettings'] = {
@@ -231,8 +234,10 @@ class AlarmSettings extends Equatable {
       notificationSettings: notificationSettings ?? this.notificationSettings,
       loopAudio: loopAudio ?? this.loopAudio,
       vibrate: vibrate ?? this.vibrate,
-      warningNotificationOnKill: warningNotificationOnKill ?? this.warningNotificationOnKill,
-      androidFullScreenIntent: androidFullScreenIntent ?? this.androidFullScreenIntent,
+      warningNotificationOnKill:
+          warningNotificationOnKill ?? this.warningNotificationOnKill,
+      androidFullScreenIntent:
+          androidFullScreenIntent ?? this.androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap ?? this.allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio ?? this.iOSBackgroundAudio,
       payload: payload?.call() ?? this.payload,

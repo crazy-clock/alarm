@@ -12,6 +12,7 @@ data class EditRingingAlarmSettings(
     val loopAudio: Boolean?,
     val vibrate: Boolean?,
     val flashlight: Boolean?,
+    val voiceTagSettings: VoiceTagSettings?,
 ) {
     companion object {
         fun fromWire(e: EditRingingAlarmSettingsWire): EditRingingAlarmSettings {
@@ -21,7 +22,8 @@ data class EditRingingAlarmSettings(
                 e.assetAudioPath,
                 e.loopAudio,
                 e.vibrate,
-                e.flashlight
+                e.flashlight,
+                e.voiceTagSettings?.let { VoiceTagSettings.fromWire(it) },
             )
         }
     }

@@ -277,6 +277,7 @@ class EditRingingAlarmSettingsWire {
     this.assetAudioPath,
     this.vibrate,
     this.flashlight,
+    this.voiceTagSettings,
   });
 
   int id;
@@ -291,6 +292,8 @@ class EditRingingAlarmSettingsWire {
 
   bool? flashlight;
 
+  VoiceTagSettingsWire? voiceTagSettings;
+
   Object encode() {
     return <Object?>[
       id,
@@ -299,6 +302,7 @@ class EditRingingAlarmSettingsWire {
       assetAudioPath,
       vibrate,
       flashlight,
+      voiceTagSettings,
     ];
   }
 
@@ -311,6 +315,7 @@ class EditRingingAlarmSettingsWire {
       assetAudioPath: result[3] as String?,
       vibrate: result[4] as bool?,
       flashlight: result[5] as bool?,
+      voiceTagSettings: result[6] as VoiceTagSettingsWire?,
     );
   }
 }

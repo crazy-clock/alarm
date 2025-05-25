@@ -241,7 +241,8 @@ data class EditRingingAlarmSettingsWire (
   val loopAudio: Boolean? = null,
   val assetAudioPath: String? = null,
   val vibrate: Boolean? = null,
-  val flashlight: Boolean? = null
+  val flashlight: Boolean? = null,
+  val voiceTagSettings: VoiceTagSettingsWire? = null
 )
  {
   companion object {
@@ -252,7 +253,8 @@ data class EditRingingAlarmSettingsWire (
       val assetAudioPath = pigeonVar_list[3] as String?
       val vibrate = pigeonVar_list[4] as Boolean?
       val flashlight = pigeonVar_list[5] as Boolean?
-      return EditRingingAlarmSettingsWire(id, volumeSettings, loopAudio, assetAudioPath, vibrate, flashlight)
+      val voiceTagSettings = pigeonVar_list[6] as VoiceTagSettingsWire?
+      return EditRingingAlarmSettingsWire(id, volumeSettings, loopAudio, assetAudioPath, vibrate, flashlight, voiceTagSettings)
     }
   }
   fun toList(): List<Any?> {
@@ -263,6 +265,7 @@ data class EditRingingAlarmSettingsWire (
       assetAudioPath,
       vibrate,
       flashlight,
+      voiceTagSettings,
     )
   }
 }
