@@ -138,6 +138,15 @@ class AlarmService : Service() {
             }
         }
 
+        // Set the volume if specified
+        if (alarmSettings.volumeSettings.volume != null) {
+            volumeService?.setVolume(
+                alarmSettings.volumeSettings.volume,
+                alarmSettings.volumeSettings.volumeEnforced,
+                showSystemUI
+            )
+        }
+
         // 如果开启了语音标签，则播放语音标签
         if (alarmSettings.voiceTagSettings.enable) {
             ttsService = TTSService(
@@ -146,15 +155,6 @@ class AlarmService : Service() {
                 alarmSettings.voiceTagSettings.volume,
                 alarmSettings.voiceTagSettings.speechRate,
                 alarmSettings.voiceTagSettings.pitch
-            )
-        }
-
-        // Set the volume if specified
-        if (alarmSettings.volumeSettings.volume != null) {
-            volumeService?.setVolume(
-                alarmSettings.volumeSettings.volume,
-                alarmSettings.volumeSettings.volumeEnforced,
-                showSystemUI
             )
         }
 

@@ -31,7 +31,7 @@ class AudioService(private val context: Context) {
     }
 
     fun getPlayingMediaPlayersIds(): List<Int> {
-        return mediaPlayers.filter { (_, mediaPlayer) -> mediaPlayer.isPlaying }.keys.toList()
+        return mediaPlayers.filter { (_, _) -> true }.keys.toList()
     }
 
     fun playAudio(
@@ -45,6 +45,7 @@ class AudioService(private val context: Context) {
         stopAudio(id) // Stop and release any existing MediaPlayer and Timer for this ID
         if (volume != null && volume <= 0) {
             Log.d(TAG, "AudioService playAudio, volume = 0, just stop the audio")
+            mediaPlayers[id] = MediaPlayer()
             return
         }
 
