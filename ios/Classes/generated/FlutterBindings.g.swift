@@ -217,6 +217,8 @@ struct VoiceTagSettingsWire {
   var volume: Double
   var speechRate: Double
   var pitch: Double
+  var loop: Bool
+  var loopInterval: Int64
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -226,13 +228,17 @@ struct VoiceTagSettingsWire {
     let volume = pigeonVar_list[2] as! Double
     let speechRate = pigeonVar_list[3] as! Double
     let pitch = pigeonVar_list[4] as! Double
+    let loop = pigeonVar_list[5] as! Bool
+    let loopInterval = pigeonVar_list[6] as! Int64
 
     return VoiceTagSettingsWire(
       enable: enable,
       text: text,
       volume: volume,
       speechRate: speechRate,
-      pitch: pitch
+      pitch: pitch,
+      loop: loop,
+      loopInterval: loopInterval
     )
   }
   func toList() -> [Any?] {
@@ -242,6 +248,8 @@ struct VoiceTagSettingsWire {
       volume,
       speechRate,
       pitch,
+      loop,
+      loopInterval,
     ]
   }
 }
@@ -286,6 +294,7 @@ struct EditRingingAlarmSettingsWire {
   var assetAudioPath: String? = nil
   var vibrate: Bool? = nil
   var flashlight: Bool? = nil
+  var voiceTagSettings: VoiceTagSettingsWire? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -296,6 +305,7 @@ struct EditRingingAlarmSettingsWire {
     let assetAudioPath: String? = nilOrValue(pigeonVar_list[3])
     let vibrate: Bool? = nilOrValue(pigeonVar_list[4])
     let flashlight: Bool? = nilOrValue(pigeonVar_list[5])
+    let voiceTagSettings: VoiceTagSettingsWire? = nilOrValue(pigeonVar_list[6])
 
     return EditRingingAlarmSettingsWire(
       id: id,
@@ -303,7 +313,8 @@ struct EditRingingAlarmSettingsWire {
       loopAudio: loopAudio,
       assetAudioPath: assetAudioPath,
       vibrate: vibrate,
-      flashlight: flashlight
+      flashlight: flashlight,
+      voiceTagSettings: voiceTagSettings
     )
   }
   func toList() -> [Any?] {
@@ -314,6 +325,7 @@ struct EditRingingAlarmSettingsWire {
       assetAudioPath,
       vibrate,
       flashlight,
+      voiceTagSettings,
     ]
   }
 }

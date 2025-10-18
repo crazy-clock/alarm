@@ -154,7 +154,9 @@ class AlarmService : Service() {
                 alarmSettings.voiceTagSettings.text,
                 alarmSettings.voiceTagSettings.volume,
                 alarmSettings.voiceTagSettings.speechRate,
-                alarmSettings.voiceTagSettings.pitch
+                alarmSettings.voiceTagSettings.pitch,
+                alarmSettings.voiceTagSettings.loop,
+                alarmSettings.voiceTagSettings.loopInterval,
             )
         }
 

@@ -10,6 +10,8 @@ data class VoiceTagSettings(
     val volume: Double,
     val speechRate: Double,
     val pitch: Double,
+    val loop: Boolean,
+    val loopInterval: Long,
 ) {
     companion object {
         fun fromWire(e: VoiceTagSettingsWire): VoiceTagSettings {
@@ -19,6 +21,8 @@ data class VoiceTagSettings(
                 e.volume,
                 e.speechRate,
                 e.pitch,
+                e.loop,
+                e.loopInterval,
             )
         }
     }

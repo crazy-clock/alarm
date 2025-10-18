@@ -183,7 +183,9 @@ data class VoiceTagSettingsWire (
   val text: String,
   val volume: Double,
   val speechRate: Double,
-  val pitch: Double
+  val pitch: Double,
+  val loop: Boolean,
+  val loopInterval: Long
 )
  {
   companion object {
@@ -193,7 +195,9 @@ data class VoiceTagSettingsWire (
       val volume = pigeonVar_list[2] as Double
       val speechRate = pigeonVar_list[3] as Double
       val pitch = pigeonVar_list[4] as Double
-      return VoiceTagSettingsWire(enable, text, volume, speechRate, pitch)
+      val loop = pigeonVar_list[5] as Boolean
+      val loopInterval = pigeonVar_list[6] as Long
+      return VoiceTagSettingsWire(enable, text, volume, speechRate, pitch, loop, loopInterval)
     }
   }
   fun toList(): List<Any?> {
@@ -203,6 +207,8 @@ data class VoiceTagSettingsWire (
       volume,
       speechRate,
       pitch,
+      loop,
+      loopInterval,
     )
   }
 }

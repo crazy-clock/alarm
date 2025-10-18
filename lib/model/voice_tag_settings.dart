@@ -14,6 +14,8 @@ class VoiceTagSettings extends Equatable {
     this.volume = 1.0,
     this.speechRate = 0.1,
     this.pitch = 1.0,
+    this.loop = false,
+    this.loopInterval = 1000,
   });
 
   const VoiceTagSettings._({
@@ -22,11 +24,12 @@ class VoiceTagSettings extends Equatable {
     this.volume = 1.0,
     this.speechRate = 0.1,
     this.pitch = 1.0,
+    this.loop = false,
+    this.loopInterval = 1000,
   });
 
   /// Converts the JSON object to a `VolumeSettings` instance.
-  factory VoiceTagSettings.fromJson(Map<String, dynamic> json) =>
-      _$VoiceTagSettingsFromJson(json);
+  factory VoiceTagSettings.fromJson(Map<String, dynamic> json) => _$VoiceTagSettingsFromJson(json);
 
   /// 是否启用
   final bool enable;
@@ -43,11 +46,17 @@ class VoiceTagSettings extends Equatable {
   /// 音调
   final double pitch;
 
+  /// 是否循环播放
+  final bool loop;
+
+  /// 循环播放间隔
+  final int loopInterval;
+
   /// Converts the [VoiceTagSettings] instance to a JSON object.
   Map<String, dynamic> toJson() => _$VoiceTagSettingsToJson(this);
 
   @override
-  List<Object?> get props => [enable, volume, speechRate, pitch, text];
+  List<Object?> get props => [enable, volume, speechRate, pitch, text, loop, loopInterval];
 
   /// Converts to wire datatype which is used for host platform communication.
   VoiceTagSettingsWire toWire() => VoiceTagSettingsWire(
@@ -56,5 +65,7 @@ class VoiceTagSettings extends Equatable {
         volume: volume,
         speechRate: speechRate,
         pitch: pitch,
+        loop: loop,
+        loopInterval: loopInterval,
       );
 }

@@ -199,6 +199,8 @@ class VoiceTagSettingsWire {
     required this.volume,
     required this.speechRate,
     required this.pitch,
+    required this.loop,
+    required this.loopInterval,
   });
 
   bool enable;
@@ -211,6 +213,10 @@ class VoiceTagSettingsWire {
 
   double pitch;
 
+  bool loop;
+
+  int loopInterval;
+
   Object encode() {
     return <Object?>[
       enable,
@@ -218,6 +224,8 @@ class VoiceTagSettingsWire {
       volume,
       speechRate,
       pitch,
+      loop,
+      loopInterval,
     ];
   }
 
@@ -229,6 +237,8 @@ class VoiceTagSettingsWire {
       volume: result[2]! as double,
       speechRate: result[3]! as double,
       pitch: result[4]! as double,
+      loop: result[5]! as bool,
+      loopInterval: result[6]! as int,
     );
   }
 }

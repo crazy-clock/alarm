@@ -78,6 +78,8 @@ class VoiceTagSettingsWire {
     required this.volume,
     required this.speechRate,
     required this.pitch,
+    required this.loop,
+    required this.loopInterval,
   });
 
   final bool enable;
@@ -85,6 +87,8 @@ class VoiceTagSettingsWire {
   final double volume;
   final double speechRate;
   final double pitch;
+  final bool loop;
+  final int loopInterval;
 }
 
 class NotificationSettingsWire {

@@ -20,6 +20,9 @@ VoiceTagSettings _$VoiceTagSettingsFromJson(Map<String, dynamic> json) =>
               'speechRate', (v) => (v as num?)?.toDouble() ?? 0.1),
           pitch:
               $checkedConvert('pitch', (v) => (v as num?)?.toDouble() ?? 1.0),
+          loop: $checkedConvert('loop', (v) => v as bool? ?? false),
+          loopInterval: $checkedConvert(
+              'loopInterval', (v) => (v as num?)?.toInt() ?? 1000),
         );
         return val;
       },
@@ -32,4 +35,6 @@ Map<String, dynamic> _$VoiceTagSettingsToJson(VoiceTagSettings instance) =>
       'volume': instance.volume,
       'speechRate': instance.speechRate,
       'pitch': instance.pitch,
+      'loop': instance.loop,
+      'loopInterval': instance.loopInterval,
     };
