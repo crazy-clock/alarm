@@ -311,6 +311,7 @@ class AlarmService : Service() {
     }
 
     private fun stopAlarm(id: Int) {
+        Log.e(TAG, "AlarmService stopAlarm $id")
         AlarmRingingLiveData.instance.update(false)
         try {
             val playingIds = audioService?.getPlayingMediaPlayersIds() ?: listOf()
@@ -329,6 +330,7 @@ class AlarmService : Service() {
             }
 
             flashlightService?.turnOffFlashlight()  // 关闭手电筒
+            ttsService?.cleanup()  // 清理 TTS 资源
 
             stopForeground(true)
         } catch (e: IllegalStateException) {
