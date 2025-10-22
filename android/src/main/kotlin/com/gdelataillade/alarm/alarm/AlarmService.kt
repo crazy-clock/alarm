@@ -339,6 +339,7 @@ class AlarmService : Service() {
     }
 
     override fun onDestroy() {
+        Log.e(TAG, "AlarmService onDestroy")
         ringingAlarmIds = listOf()
 
         audioService?.cleanUp()

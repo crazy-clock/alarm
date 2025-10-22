@@ -119,6 +119,7 @@ class TTSService(
     }
 
     fun cleanup() {
+        Log.d(TAG, "TTS cleanup now")
         // 确保恢复原来的媒体音量
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
         // 移除所有待处理的延迟消息
