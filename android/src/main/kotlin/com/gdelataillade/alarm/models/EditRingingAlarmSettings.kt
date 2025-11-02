@@ -13,6 +13,7 @@ data class EditRingingAlarmSettings(
     val vibrate: Boolean?,
     val flashlight: Boolean?,
     val voiceTagSettings: VoiceTagSettings?,
+    val timePressureSettings: TimePressureSettings?,
 ) {
     companion object {
         fun fromWire(e: EditRingingAlarmSettingsWire): EditRingingAlarmSettings {
@@ -24,6 +25,7 @@ data class EditRingingAlarmSettings(
                 e.vibrate,
                 e.flashlight,
                 e.voiceTagSettings?.let { VoiceTagSettings.fromWire(it) },
+                e.timePressureSettings?.let { TimePressureSettings.fromWire(it) },
             )
         }
     }

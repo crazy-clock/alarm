@@ -1,3 +1,4 @@
+import 'package:alarm/model/time_pressure_settings.dart';
 import 'package:alarm/model/voice_tag_settings.dart';
 import 'package:alarm/model/volume_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
@@ -18,6 +19,7 @@ class EditRingingAlarmSettings extends Equatable {
     this.vibrate,
     this.flashlight,
     this.voiceTagSettings,
+    this.timePressureSettings,
   });
 
   const EditRingingAlarmSettings._({
@@ -28,11 +30,11 @@ class EditRingingAlarmSettings extends Equatable {
     this.vibrate,
     this.flashlight,
     this.voiceTagSettings,
+    this.timePressureSettings,
   });
 
   /// Converts the JSON object to a `EditRingingAlarmSettings` instance.
-  factory EditRingingAlarmSettings.fromJson(Map<String, dynamic> json) =>
-      _$EditRingingAlarmSettingsFromJson(json);
+  factory EditRingingAlarmSettings.fromJson(Map<String, dynamic> json) => _$EditRingingAlarmSettingsFromJson(json);
 
   /// id
   final int id;
@@ -55,19 +57,14 @@ class EditRingingAlarmSettings extends Equatable {
   /// 语音标签设置
   final VoiceTagSettings? voiceTagSettings;
 
+  /// 时间压力设置
+  final TimePressureSettings? timePressureSettings;
+
   /// Converts the [EditRingingAlarmSettings] instance to a JSON object.
   Map<String, dynamic> toJson() => _$EditRingingAlarmSettingsToJson(this);
 
   @override
-  List<Object?> get props => [
-        id,
-        volumeSettings,
-        assetAudioPath,
-        loopAudio,
-        vibrate,
-        flashlight,
-        voiceTagSettings
-      ];
+  List<Object?> get props => [id, volumeSettings, assetAudioPath, loopAudio, vibrate, flashlight, voiceTagSettings, timePressureSettings];
 
   /// Converts to wire datatype which is used for host platform communication.
   EditRingingAlarmSettingsWire toWire() => EditRingingAlarmSettingsWire(
@@ -78,5 +75,6 @@ class EditRingingAlarmSettings extends Equatable {
         vibrate: vibrate,
         flashlight: flashlight,
         voiceTagSettings: voiceTagSettings?.toWire(),
+        timePressureSettings: timePressureSettings?.toWire(),
       );
 }

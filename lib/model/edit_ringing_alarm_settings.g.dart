@@ -29,6 +29,11 @@ EditRingingAlarmSettings _$EditRingingAlarmSettingsFromJson(
               (v) => v == null
                   ? null
                   : VoiceTagSettings.fromJson(v as Map<String, dynamic>)),
+          timePressureSettings: $checkedConvert(
+              'timePressureSettings',
+              (v) => v == null
+                  ? null
+                  : TimePressureSettings.fromJson(v as Map<String, dynamic>)),
         );
         return val;
       },
@@ -46,4 +51,6 @@ Map<String, dynamic> _$EditRingingAlarmSettingsToJson(
       if (instance.flashlight case final value?) 'flashlight': value,
       if (instance.voiceTagSettings?.toJson() case final value?)
         'voiceTagSettings': value,
+      if (instance.timePressureSettings?.toJson() case final value?)
+        'timePressureSettings': value,
     };

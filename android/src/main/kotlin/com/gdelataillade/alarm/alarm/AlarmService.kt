@@ -309,6 +309,29 @@ class AlarmService : Service() {
             }
         }
 
+        // 5. 时间压力
+        if (settings.timePressureSettings != null) {
+            try {
+                if (settings.timePressureSettings.enable) {
+                    Log.d(TAG, "[EditRingingAlarm] Starting timePressure for alarm ID: $id")
+                    timeAnnouncementService = TimeAnnouncementService(
+                        context = this,
+                        audioService = audioService,
+                        volume = settings.timePressureSettings.volume,
+                        speechRate = settings.timePressureSettings.speechRate,
+                        pitch = settings.timePressureSettings.pitch,
+                        loop = settings.timePressureSettings.loop,
+                        loopInterval = settings.timePressureSettings.loopInterval,
+                    )
+                } else {
+                    Log.d(TAG, "[EditRingingAlarm] Stop timePressure for alarm ID: $id")
+                    timeAnnouncementService?.cleanup()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "[EditRingingAlarm] audio error. ${e.message}")
+            }
+        }
+
     }
 
 
