@@ -78,17 +78,13 @@ class TimeAnnouncementService(
         tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
                 isSpeaking = true
-                // 播报开始时，降低音频音量
-                duckAudioVolume()
-                Log.d(TAG, "Time announcement started, audio volume ducked")
+                Log.d(TAG, "Time announcement TTS started")
             }
 
             override fun onDone(utteranceId: String?) {
                 isSpeaking = false
                 if (utteranceId == "TIME_ANNOUNCEMENT") {
-                    // 恢复音频音量
-                    restoreAudioVolume()
-                    Log.d(TAG, "Time announcement done, audio volume restored")
+                    Log.d(TAG, "Time announcement TTS done")
                     
                     if (loop) {
                         // 如果需要循环播放，延迟指定时间后再次播报
@@ -104,7 +100,7 @@ class TimeAnnouncementService(
 
             override fun onError(utteranceId: String?) {
                 isSpeaking = false
-                // 发生错误时也恢复音频音量
+                // 发生错误时恢复音频音量
                 restoreAudioVolume()
                 // 恢复系统音量
                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
@@ -125,7 +121,19 @@ class TimeAnnouncementService(
         val minute = calendar.get(Calendar.MINUTE)
 
         val timeText = formatTimeText(hour, minute)
+        
+        // 播报前降低音频音量
+        Log.d(TAG, "Ducking audio volume before announcement")
+        duckAudioVolume()
+        
+        // 开始播报
         speakText(timeText)
+        
+        // 延迟2秒后恢复音频音量（给TTS播报留出时间）
+        handler.postDelayed({
+            Log.d(TAG, "Restoring audio volume after announcement")
+            restoreAudioVolume()
+        }, 2000L)
     }
 
     /**
