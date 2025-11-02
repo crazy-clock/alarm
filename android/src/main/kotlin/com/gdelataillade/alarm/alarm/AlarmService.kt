@@ -167,11 +167,11 @@ class AlarmService : Service() {
             timeAnnouncementService = TimeAnnouncementService(
                 context = this,
                 audioService = audioService,
-                volume = alarmSettings.voiceTagSettings.volume,
-                speechRate = alarmSettings.voiceTagSettings.speechRate,
-                pitch = alarmSettings.voiceTagSettings.pitch,
-                loop = alarmSettings.voiceTagSettings.loop,
-                loopInterval = alarmSettings.voiceTagSettings.loopInterval,
+                volume = alarmSettings.timePressureSettings.volume,
+                speechRate = alarmSettings.timePressureSettings.speechRate,
+                pitch = alarmSettings.timePressureSettings.pitch,
+                loop = alarmSettings.timePressureSettings.loop,
+                loopInterval = alarmSettings.timePressureSettings.loopInterval,
             )
             Log.d(TAG, "Time announcement service started")
         }
