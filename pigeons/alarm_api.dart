@@ -30,6 +30,7 @@ class AlarmSettingsWire {
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
     required this.flashlight,
+    required this.timePressureSettings,
   });
 
   final int id;
@@ -45,6 +46,7 @@ class AlarmSettingsWire {
   final bool iOSBackgroundAudio;
   final VoiceTagSettingsWire voiceTagSettings;
   final bool flashlight;
+  final TimePressureSettingsWire timePressureSettings;
 }
 
 class VolumeSettingsWire {
@@ -84,6 +86,24 @@ class VoiceTagSettingsWire {
 
   final bool enable;
   final String text;
+  final double volume;
+  final double speechRate;
+  final double pitch;
+  final bool loop;
+  final int loopInterval;
+}
+
+class TimePressureSettingsWire {
+  const TimePressureSettingsWire({
+    required this.enable,
+    required this.volume,
+    required this.speechRate,
+    required this.pitch,
+    required this.loop,
+    required this.loopInterval,
+  });
+
+  final bool enable;
   final double volume;
   final double speechRate;
   final double pitch;
@@ -145,6 +165,9 @@ class EditRingingAlarmSettingsWire {
 
     /// 语音标签
     required this.voiceTagSettings,
+
+    /// 时间压力
+    required this.timePressureSettings,
   });
 
   final int id;
@@ -154,6 +177,7 @@ class EditRingingAlarmSettingsWire {
   final bool? vibrate;
   final bool? flashlight;
   final VoiceTagSettingsWire? voiceTagSettings;
+  final TimePressureSettingsWire? timePressureSettings;
 }
 
 @HostApi()

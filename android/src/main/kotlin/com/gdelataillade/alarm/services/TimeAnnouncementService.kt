@@ -29,7 +29,7 @@ class TimeAnnouncementService(
 
     companion object {
         private const val TAG = "TimeAnnouncementService"
-        private const val AUDIO_DUCK_VOLUME = 0.3f // 播报时将音频降低到30%
+        private const val AUDIO_DUCK_VOLUME = 0.1f // 播报时将音频降低到10%
     }
 
     private var tts: TextToSpeech? = null

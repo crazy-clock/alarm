@@ -64,6 +64,7 @@ class AlarmSettingsWire {
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
     required this.flashlight,
+    required this.timePressureSettings,
   });
 
   int id;
@@ -92,6 +93,8 @@ class AlarmSettingsWire {
 
   bool flashlight;
 
+  TimePressureSettingsWire timePressureSettings;
+
   Object encode() {
     return <Object?>[
       id,
@@ -107,6 +110,7 @@ class AlarmSettingsWire {
       iOSBackgroundAudio,
       voiceTagSettings,
       flashlight,
+      timePressureSettings,
     ];
   }
 
@@ -126,6 +130,7 @@ class AlarmSettingsWire {
       iOSBackgroundAudio: result[10]! as bool,
       voiceTagSettings: result[11]! as VoiceTagSettingsWire,
       flashlight: result[12]! as bool,
+      timePressureSettings: result[13]! as TimePressureSettingsWire,
     );
   }
 }
@@ -243,6 +248,52 @@ class VoiceTagSettingsWire {
   }
 }
 
+class TimePressureSettingsWire {
+  TimePressureSettingsWire({
+    required this.enable,
+    required this.volume,
+    required this.speechRate,
+    required this.pitch,
+    required this.loop,
+    required this.loopInterval,
+  });
+
+  bool enable;
+
+  double volume;
+
+  double speechRate;
+
+  double pitch;
+
+  bool loop;
+
+  int loopInterval;
+
+  Object encode() {
+    return <Object?>[
+      enable,
+      volume,
+      speechRate,
+      pitch,
+      loop,
+      loopInterval,
+    ];
+  }
+
+  static TimePressureSettingsWire decode(Object result) {
+    result as List<Object?>;
+    return TimePressureSettingsWire(
+      enable: result[0]! as bool,
+      volume: result[1]! as double,
+      speechRate: result[2]! as double,
+      pitch: result[3]! as double,
+      loop: result[4]! as bool,
+      loopInterval: result[5]! as int,
+    );
+  }
+}
+
 class NotificationSettingsWire {
   NotificationSettingsWire({
     required this.title,
@@ -288,6 +339,7 @@ class EditRingingAlarmSettingsWire {
     this.vibrate,
     this.flashlight,
     this.voiceTagSettings,
+    this.timePressureSettings,
   });
 
   int id;
@@ -304,6 +356,8 @@ class EditRingingAlarmSettingsWire {
 
   VoiceTagSettingsWire? voiceTagSettings;
 
+  TimePressureSettingsWire? timePressureSettings;
+
   Object encode() {
     return <Object?>[
       id,
@@ -313,6 +367,7 @@ class EditRingingAlarmSettingsWire {
       vibrate,
       flashlight,
       voiceTagSettings,
+      timePressureSettings,
     ];
   }
 
@@ -326,6 +381,7 @@ class EditRingingAlarmSettingsWire {
       vibrate: result[4] as bool?,
       flashlight: result[5] as bool?,
       voiceTagSettings: result[6] as VoiceTagSettingsWire?,
+      timePressureSettings: result[7] as TimePressureSettingsWire?,
     );
   }
 }
@@ -352,11 +408,14 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is VoiceTagSettingsWire) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is NotificationSettingsWire) {
+    } else if (value is TimePressureSettingsWire) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is EditRingingAlarmSettingsWire) {
+    } else if (value is NotificationSettingsWire) {
       buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is EditRingingAlarmSettingsWire) {
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -378,8 +437,10 @@ class _PigeonCodec extends StandardMessageCodec {
       case 133:
         return VoiceTagSettingsWire.decode(readValue(buffer)!);
       case 134:
-        return NotificationSettingsWire.decode(readValue(buffer)!);
+        return TimePressureSettingsWire.decode(readValue(buffer)!);
       case 135:
+        return NotificationSettingsWire.decode(readValue(buffer)!);
+      case 136:
         return EditRingingAlarmSettingsWire.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

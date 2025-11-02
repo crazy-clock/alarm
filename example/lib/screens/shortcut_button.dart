@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:alarm/alarm.dart';
+import 'package:alarm/model/time_pressure_settings.dart';
 import 'package:alarm/model/voice_tag_settings.dart';
 import 'package:alarm/model/volume_settings.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +15,10 @@ class ExampleAlarmHomeShortcutButton extends StatefulWidget {
   final void Function() refreshAlarms;
 
   @override
-  State<ExampleAlarmHomeShortcutButton> createState() =>
-      _ExampleAlarmHomeShortcutButtonState();
+  State<ExampleAlarmHomeShortcutButton> createState() => _ExampleAlarmHomeShortcutButtonState();
 }
 
-class _ExampleAlarmHomeShortcutButtonState
-    extends State<ExampleAlarmHomeShortcutButton> {
+class _ExampleAlarmHomeShortcutButtonState extends State<ExampleAlarmHomeShortcutButton> {
   bool showMenu = false;
 
   Future<void> onPressButton(int delayInHours) async {
@@ -45,6 +44,7 @@ class _ExampleAlarmHomeShortcutButtonState
       ),
       warningNotificationOnKill: Platform.isIOS,
       voiceTagSettings: const VoiceTagSettings(enable: false),
+      timePressureSettings: const TimePressureSettings(enable: false),
     );
 
     await Alarm.set(alarmSettings: alarmSettings);

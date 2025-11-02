@@ -1,6 +1,7 @@
 package com.gdelataillade.alarm.models
 
 import com.gdelataillade.alarm.generated.AlarmSettingsWire
+import com.gdelataillade.alarm.generated.TimePressureSettingsWire
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -28,7 +29,8 @@ data class AlarmSettings(
     val androidFullScreenIntent: Boolean,
     val allowAlarmOverlap: Boolean = false, // Defaults to false for backward compatibility
     val voiceTagSettings: VoiceTagSettings,
-    val flashlight: Boolean
+    val flashlight: Boolean,
+    val timePressureSettings: TimePressureSettings,
 ) {
     companion object {
         fun fromWire(e: AlarmSettingsWire): AlarmSettings {
@@ -44,7 +46,8 @@ data class AlarmSettings(
                 e.androidFullScreenIntent,
                 e.allowAlarmOverlap,
                 VoiceTagSettings.fromWire(e.voiceTagSettings),
-                e.flashlight
+                e.flashlight,
+                TimePressureSettings.fromWire(e.timePressureSettings),
             )
         }
 
@@ -63,6 +66,9 @@ data class AlarmSettings(
             val voiceTagSettings = jsonObject["voiceTagSettings"]?.let {
                 Json.decodeFromJsonElement(VoiceTagSettings.serializer(), it)
             } ?: throw SerializationException("Missing 'voiceTagSettings'")
+            val timePressureSettings = jsonObject["timePressureSettings"]?.let {
+                Json.decodeFromJsonElement(TimePressureSettings.serializer(), it)
+            } ?: throw SerializationException("Missing 'timePressureSettings'")
             val loopAudio = jsonObject.primitiveBoolean("loopAudio") ?: throw SerializationException("Missing 'loopAudio'")
             val vibrate = jsonObject.primitiveBoolean("vibrate") ?: throw SerializationException("Missing 'vibrate'")
             val warningNotificationOnKill = jsonObject.primitiveBoolean("warningNotificationOnKill")
@@ -105,7 +111,8 @@ data class AlarmSettings(
                 androidFullScreenIntent = androidFullScreenIntent,
                 allowAlarmOverlap = allowAlarmOverlap,
                 voiceTagSettings = voiceTagSettings,
-                flashlight = flashlight
+                flashlight = flashlight,
+                timePressureSettings = timePressureSettings,
             )
         }
     }

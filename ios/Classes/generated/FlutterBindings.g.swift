@@ -101,6 +101,7 @@ struct AlarmSettingsWire {
   var iOSBackgroundAudio: Bool
   var voiceTagSettings: VoiceTagSettingsWire
   var flashlight: Bool
+  var timePressureSettings: TimePressureSettingsWire
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -118,6 +119,7 @@ struct AlarmSettingsWire {
     let iOSBackgroundAudio = pigeonVar_list[10] as! Bool
     let voiceTagSettings = pigeonVar_list[11] as! VoiceTagSettingsWire
     let flashlight = pigeonVar_list[12] as! Bool
+    let timePressureSettings = pigeonVar_list[13] as! TimePressureSettingsWire
 
     return AlarmSettingsWire(
       id: id,
@@ -132,7 +134,8 @@ struct AlarmSettingsWire {
       allowAlarmOverlap: allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio,
       voiceTagSettings: voiceTagSettings,
-      flashlight: flashlight
+      flashlight: flashlight,
+      timePressureSettings: timePressureSettings
     )
   }
   func toList() -> [Any?] {
@@ -150,6 +153,7 @@ struct AlarmSettingsWire {
       iOSBackgroundAudio,
       voiceTagSettings,
       flashlight,
+      timePressureSettings,
     ]
   }
 }
@@ -255,6 +259,46 @@ struct VoiceTagSettingsWire {
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
+struct TimePressureSettingsWire {
+  var enable: Bool
+  var volume: Double
+  var speechRate: Double
+  var pitch: Double
+  var loop: Bool
+  var loopInterval: Int64
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> TimePressureSettingsWire? {
+    let enable = pigeonVar_list[0] as! Bool
+    let volume = pigeonVar_list[1] as! Double
+    let speechRate = pigeonVar_list[2] as! Double
+    let pitch = pigeonVar_list[3] as! Double
+    let loop = pigeonVar_list[4] as! Bool
+    let loopInterval = pigeonVar_list[5] as! Int64
+
+    return TimePressureSettingsWire(
+      enable: enable,
+      volume: volume,
+      speechRate: speechRate,
+      pitch: pitch,
+      loop: loop,
+      loopInterval: loopInterval
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      enable,
+      volume,
+      speechRate,
+      pitch,
+      loop,
+      loopInterval,
+    ]
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
 struct NotificationSettingsWire {
   var title: String
   var body: String
@@ -295,6 +339,7 @@ struct EditRingingAlarmSettingsWire {
   var vibrate: Bool? = nil
   var flashlight: Bool? = nil
   var voiceTagSettings: VoiceTagSettingsWire? = nil
+  var timePressureSettings: TimePressureSettingsWire? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -306,6 +351,7 @@ struct EditRingingAlarmSettingsWire {
     let vibrate: Bool? = nilOrValue(pigeonVar_list[4])
     let flashlight: Bool? = nilOrValue(pigeonVar_list[5])
     let voiceTagSettings: VoiceTagSettingsWire? = nilOrValue(pigeonVar_list[6])
+    let timePressureSettings: TimePressureSettingsWire? = nilOrValue(pigeonVar_list[7])
 
     return EditRingingAlarmSettingsWire(
       id: id,
@@ -314,7 +360,8 @@ struct EditRingingAlarmSettingsWire {
       assetAudioPath: assetAudioPath,
       vibrate: vibrate,
       flashlight: flashlight,
-      voiceTagSettings: voiceTagSettings
+      voiceTagSettings: voiceTagSettings,
+      timePressureSettings: timePressureSettings
     )
   }
   func toList() -> [Any?] {
@@ -326,6 +373,7 @@ struct EditRingingAlarmSettingsWire {
       vibrate,
       flashlight,
       voiceTagSettings,
+      timePressureSettings,
     ]
   }
 }
@@ -348,8 +396,10 @@ private class FlutterBindingsPigeonCodecReader: FlutterStandardReader {
     case 133:
       return VoiceTagSettingsWire.fromList(self.readValue() as! [Any?])
     case 134:
-      return NotificationSettingsWire.fromList(self.readValue() as! [Any?])
+      return TimePressureSettingsWire.fromList(self.readValue() as! [Any?])
     case 135:
+      return NotificationSettingsWire.fromList(self.readValue() as! [Any?])
+    case 136:
       return EditRingingAlarmSettingsWire.fromList(self.readValue() as! [Any?])
     default:
       return super.readValue(ofType: type)
@@ -374,11 +424,14 @@ private class FlutterBindingsPigeonCodecWriter: FlutterStandardWriter {
     } else if let value = value as? VoiceTagSettingsWire {
       super.writeByte(133)
       super.writeValue(value.toList())
-    } else if let value = value as? NotificationSettingsWire {
+    } else if let value = value as? TimePressureSettingsWire {
       super.writeByte(134)
       super.writeValue(value.toList())
-    } else if let value = value as? EditRingingAlarmSettingsWire {
+    } else if let value = value as? NotificationSettingsWire {
       super.writeByte(135)
+      super.writeValue(value.toList())
+    } else if let value = value as? EditRingingAlarmSettingsWire {
+      super.writeByte(136)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

@@ -89,7 +89,8 @@ data class AlarmSettingsWire (
   val allowAlarmOverlap: Boolean,
   val iOSBackgroundAudio: Boolean,
   val voiceTagSettings: VoiceTagSettingsWire,
-  val flashlight: Boolean
+  val flashlight: Boolean,
+  val timePressureSettings: TimePressureSettingsWire
 )
  {
   companion object {
@@ -107,7 +108,8 @@ data class AlarmSettingsWire (
       val iOSBackgroundAudio = pigeonVar_list[10] as Boolean
       val voiceTagSettings = pigeonVar_list[11] as VoiceTagSettingsWire
       val flashlight = pigeonVar_list[12] as Boolean
-      return AlarmSettingsWire(id, millisecondsSinceEpoch, assetAudioPath, volumeSettings, notificationSettings, loopAudio, vibrate, warningNotificationOnKill, androidFullScreenIntent, allowAlarmOverlap, iOSBackgroundAudio, voiceTagSettings, flashlight)
+      val timePressureSettings = pigeonVar_list[13] as TimePressureSettingsWire
+      return AlarmSettingsWire(id, millisecondsSinceEpoch, assetAudioPath, volumeSettings, notificationSettings, loopAudio, vibrate, warningNotificationOnKill, androidFullScreenIntent, allowAlarmOverlap, iOSBackgroundAudio, voiceTagSettings, flashlight, timePressureSettings)
     }
   }
   fun toList(): List<Any?> {
@@ -125,6 +127,7 @@ data class AlarmSettingsWire (
       iOSBackgroundAudio,
       voiceTagSettings,
       flashlight,
+      timePressureSettings,
     )
   }
 }
@@ -214,6 +217,39 @@ data class VoiceTagSettingsWire (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class TimePressureSettingsWire (
+  val enable: Boolean,
+  val volume: Double,
+  val speechRate: Double,
+  val pitch: Double,
+  val loop: Boolean,
+  val loopInterval: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TimePressureSettingsWire {
+      val enable = pigeonVar_list[0] as Boolean
+      val volume = pigeonVar_list[1] as Double
+      val speechRate = pigeonVar_list[2] as Double
+      val pitch = pigeonVar_list[3] as Double
+      val loop = pigeonVar_list[4] as Boolean
+      val loopInterval = pigeonVar_list[5] as Long
+      return TimePressureSettingsWire(enable, volume, speechRate, pitch, loop, loopInterval)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      enable,
+      volume,
+      speechRate,
+      pitch,
+      loop,
+      loopInterval,
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class NotificationSettingsWire (
   val title: String,
   val body: String,
@@ -248,7 +284,8 @@ data class EditRingingAlarmSettingsWire (
   val assetAudioPath: String? = null,
   val vibrate: Boolean? = null,
   val flashlight: Boolean? = null,
-  val voiceTagSettings: VoiceTagSettingsWire? = null
+  val voiceTagSettings: VoiceTagSettingsWire? = null,
+  val timePressureSettings: TimePressureSettingsWire? = null
 )
  {
   companion object {
@@ -260,7 +297,8 @@ data class EditRingingAlarmSettingsWire (
       val vibrate = pigeonVar_list[4] as Boolean?
       val flashlight = pigeonVar_list[5] as Boolean?
       val voiceTagSettings = pigeonVar_list[6] as VoiceTagSettingsWire?
-      return EditRingingAlarmSettingsWire(id, volumeSettings, loopAudio, assetAudioPath, vibrate, flashlight, voiceTagSettings)
+      val timePressureSettings = pigeonVar_list[7] as TimePressureSettingsWire?
+      return EditRingingAlarmSettingsWire(id, volumeSettings, loopAudio, assetAudioPath, vibrate, flashlight, voiceTagSettings, timePressureSettings)
     }
   }
   fun toList(): List<Any?> {
@@ -272,6 +310,7 @@ data class EditRingingAlarmSettingsWire (
       vibrate,
       flashlight,
       voiceTagSettings,
+      timePressureSettings,
     )
   }
 }
@@ -305,10 +344,15 @@ private open class FlutterBindingsPigeonCodec : StandardMessageCodec() {
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NotificationSettingsWire.fromList(it)
+          TimePressureSettingsWire.fromList(it)
         }
       }
       135.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          NotificationSettingsWire.fromList(it)
+        }
+      }
+      136.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           EditRingingAlarmSettingsWire.fromList(it)
         }
@@ -338,12 +382,16 @@ private open class FlutterBindingsPigeonCodec : StandardMessageCodec() {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is NotificationSettingsWire -> {
+      is TimePressureSettingsWire -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is EditRingingAlarmSettingsWire -> {
+      is NotificationSettingsWire -> {
         stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is EditRingingAlarmSettingsWire -> {
+        stream.write(136)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

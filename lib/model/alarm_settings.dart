@@ -1,4 +1,5 @@
 import 'package:alarm/alarm.dart';
+import 'package:alarm/model/time_pressure_settings.dart';
 import 'package:alarm/model/voice_tag_settings.dart';
 import 'package:alarm/model/volume_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
@@ -20,6 +21,7 @@ class AlarmSettings extends Equatable {
     required this.volumeSettings,
     required this.notificationSettings,
     required this.voiceTagSettings,
+    required this.timePressureSettings,
     this.loopAudio = true,
     this.vibrate = true,
     this.warningNotificationOnKill = true,
@@ -43,10 +45,7 @@ class AlarmSettings extends Equatable {
 
       final volume = (json['volume'] as num?)?.toDouble();
       final fadeDurationSeconds = (json['fadeDuration'] as num?)?.toDouble();
-      final fadeDurationMillis =
-          (fadeDurationSeconds != null && fadeDurationSeconds > 0)
-              ? (fadeDurationSeconds * 1000).toInt()
-              : null;
+      final fadeDurationMillis = (fadeDurationSeconds != null && fadeDurationSeconds > 0) ? (fadeDurationSeconds * 1000).toInt() : null;
       final volumeEnforced = json['volumeEnforced'] as bool? ?? false;
 
       json['volumeSettings'] = {
@@ -181,6 +180,9 @@ class AlarmSettings extends Equatable {
   /// 是否开启手电筒
   final bool flashlight;
 
+  /// 时间压力设置
+  final TimePressureSettings timePressureSettings;
+
   /// Converts the `AlarmSettings` instance to a JSON object.
   Map<String, dynamic> toJson() => _$AlarmSettingsToJson(this);
 
@@ -199,6 +201,7 @@ class AlarmSettings extends Equatable {
         iOSBackgroundAudio: iOSBackgroundAudio,
         voiceTagSettings: voiceTagSettings.toWire(),
         flashlight: flashlight,
+        timePressureSettings: timePressureSettings.toWire(),
       );
 
   /// Creates a copy of `AlarmSettings` but with the given fields replaced with
@@ -225,6 +228,7 @@ class AlarmSettings extends Equatable {
     String? Function()? payload,
     VoiceTagSettings? voiceTagSettings,
     bool? flashlight,
+    TimePressureSettings? timePressureSettings,
   }) {
     return AlarmSettings(
       id: id ?? this.id,
@@ -234,15 +238,14 @@ class AlarmSettings extends Equatable {
       notificationSettings: notificationSettings ?? this.notificationSettings,
       loopAudio: loopAudio ?? this.loopAudio,
       vibrate: vibrate ?? this.vibrate,
-      warningNotificationOnKill:
-          warningNotificationOnKill ?? this.warningNotificationOnKill,
-      androidFullScreenIntent:
-          androidFullScreenIntent ?? this.androidFullScreenIntent,
+      warningNotificationOnKill: warningNotificationOnKill ?? this.warningNotificationOnKill,
+      androidFullScreenIntent: androidFullScreenIntent ?? this.androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap ?? this.allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio ?? this.iOSBackgroundAudio,
       payload: payload?.call() ?? this.payload,
       voiceTagSettings: voiceTagSettings ?? this.voiceTagSettings,
       flashlight: flashlight ?? this.flashlight,
+      timePressureSettings: timePressureSettings ?? this.timePressureSettings,
     );
   }
 
@@ -262,5 +265,6 @@ class AlarmSettings extends Equatable {
         payload,
         voiceTagSettings,
         flashlight,
+        timePressureSettings,
       ];
 }
