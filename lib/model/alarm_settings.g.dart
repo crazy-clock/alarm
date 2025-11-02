@@ -22,6 +22,8 @@ AlarmSettings _$AlarmSettingsFromJson(Map<String, dynamic> json) =>
               (v) => NotificationSettings.fromJson(v as Map<String, dynamic>)),
           voiceTagSettings: $checkedConvert('voiceTagSettings',
               (v) => VoiceTagSettings.fromJson(v as Map<String, dynamic>)),
+          timePressureSettings: $checkedConvert('timePressureSettings',
+              (v) => TimePressureSettings.fromJson(v as Map<String, dynamic>)),
           loopAudio: $checkedConvert('loopAudio', (v) => v as bool? ?? true),
           vibrate: $checkedConvert('vibrate', (v) => v as bool? ?? true),
           warningNotificationOnKill: $checkedConvert(
@@ -55,4 +57,5 @@ Map<String, dynamic> _$AlarmSettingsToJson(AlarmSettings instance) =>
       if (instance.payload case final value?) 'payload': value,
       'voiceTagSettings': instance.voiceTagSettings.toJson(),
       'flashlight': instance.flashlight,
+      'timePressureSettings': instance.timePressureSettings.toJson(),
     };
