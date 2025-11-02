@@ -13,26 +13,29 @@ import java.util.Locale
 import java.util.Calendar
 
 /**
- * 时间播报服务 - 每10秒播报当前时间（小时和分钟）
+ * 时间播报服务 - 循环播报当前时间（小时和分钟）
  * 例如："8点30分"
+ * 参考 TTSService 实现，支持 loop 和 loopInterval 配置
  */
 class TimeAnnouncementService(
     private val context: Context,
+    private val audioService: AudioService?,
     private val volume: Double = 0.8,
     private val speechRate: Double = 1.0,
-    private val pitch: Double = 1.0
+    private val pitch: Double = 1.0,
+    private val loop: Boolean = true,
+    private val loopInterval: Long = 10000L // 默认10秒
 ) {
 
     companion object {
         private const val TAG = "TimeAnnouncementService"
-        private const val ANNOUNCEMENT_INTERVAL = 10000L // 10秒
+        private const val AUDIO_DUCK_VOLUME = 0.3f // 播报时将音频降低到30%
     }
 
     private var tts: TextToSpeech? = null
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var originalMusicVolume: Int = 0
     private var isSpeaking = false
-    private var isRunning = false
     private val handler = Handler(Looper.getMainLooper())
 
     init {
@@ -50,8 +53,7 @@ class TimeAnnouncementService(
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.e(TAG, "TTS Language is not supported")
                 } else {
-                    setupTTS()
-                    startAnnouncement()
+                    setupAndSpeak()
                 }
             } else {
                 Log.e(TAG, "TTS Initialization failed")
@@ -59,11 +61,11 @@ class TimeAnnouncementService(
         }
     }
 
-    private fun setupTTS() {
+    private fun setupAndSpeak() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                .setUsage(AudioAttributes.USAGE_ALARM) // 设置为闹钟音频流
+                .setUsage(AudioAttributes.USAGE_MEDIA)
                 .build()
             tts?.setAudioAttributes(audioAttributes)
         }
@@ -76,48 +78,42 @@ class TimeAnnouncementService(
         tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
                 isSpeaking = true
-                Log.d(TAG, "TTS speaking started")
+                // 播报开始时，降低音频音量
+                duckAudioVolume()
+                Log.d(TAG, "Time announcement started, audio volume ducked")
             }
 
             override fun onDone(utteranceId: String?) {
                 isSpeaking = false
-                Log.d(TAG, "TTS speaking done")
-                // 恢复原来的媒体音量
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
+                if (utteranceId == "TIME_ANNOUNCEMENT") {
+                    // 恢复音频音量
+                    restoreAudioVolume()
+                    Log.d(TAG, "Time announcement done, audio volume restored")
+                    
+                    if (loop) {
+                        // 如果需要循环播放，延迟指定时间后再次播报
+                        handler.postDelayed({
+                            announceCurrentTime()
+                        }, loopInterval)
+                    } else {
+                        // 恢复系统音量
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
+                    }
+                }
             }
 
             override fun onError(utteranceId: String?) {
                 isSpeaking = false
-                Log.e(TAG, "TTS speaking error")
-                // 发生错误时也恢复原来的媒体音量
+                // 发生错误时也恢复音频音量
+                restoreAudioVolume()
+                // 恢复系统音量
                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
+                Log.e(TAG, "Time announcement error")
             }
         })
-    }
 
-    /**
-     * 开始时间播报
-     */
-    private fun startAnnouncement() {
-        if (isRunning) {
-            return
-        }
-        isRunning = true
-        scheduleNextAnnouncement()
-    }
-
-    /**
-     * 调度下一次播报
-     */
-    private fun scheduleNextAnnouncement() {
-        if (!isRunning) {
-            return
-        }
-
-        handler.postDelayed({
-            announceCurrentTime()
-            scheduleNextAnnouncement() // 继续调度下一次
-        }, ANNOUNCEMENT_INTERVAL)
+        // 开始第一次播报
+        announceCurrentTime()
     }
 
     /**
@@ -164,16 +160,21 @@ class TimeAnnouncementService(
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params)
         }
         
-        Log.d(TAG, "TTS announcing: $text with volume: $volume")
+        Log.d(TAG, "TTS announcing: $text with volume: $volume, loop: $loop, interval: ${loopInterval}ms")
     }
 
     /**
-     * 停止时间播报
+     * 降低音频播放音量（播报时间时）
      */
-    fun stop() {
-        isRunning = false
-        handler.removeCallbacksAndMessages(null)
-        Log.d(TAG, "Time announcement stopped")
+    private fun duckAudioVolume() {
+        audioService?.duckVolume(AUDIO_DUCK_VOLUME)
+    }
+
+    /**
+     * 恢复音频播放音量（播报完成后）
+     */
+    private fun restoreAudioVolume() {
+        audioService?.restoreVolume()
     }
 
     /**
@@ -181,10 +182,15 @@ class TimeAnnouncementService(
      */
     fun cleanup() {
         Log.d(TAG, "Time announcement cleanup")
-        stop()
         
         // 确保恢复原来的媒体音量
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalMusicVolume, 0)
+        
+        // 移除所有待处理的延迟消息
+        handler.removeCallbacksAndMessages(null)
+        
+        // 恢复音频音量
+        restoreAudioVolume()
         
         tts?.stop()
         tts?.shutdown()
@@ -197,12 +203,5 @@ class TimeAnnouncementService(
      */
     fun isSpeaking(): Boolean {
         return isSpeaking
-    }
-
-    /**
-     * 是否正在运行
-     */
-    fun isRunning(): Boolean {
-        return isRunning
     }
 }

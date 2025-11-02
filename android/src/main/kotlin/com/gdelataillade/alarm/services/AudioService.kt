@@ -21,6 +21,8 @@ class AudioService(private val context: Context) {
     private val timers = ConcurrentHashMap<Int, Timer>()
 
     private var onAudioComplete: (() -> Unit)? = null
+    private var originalVolume: Float = 1.0f
+    private var isDucked: Boolean = false
 
     fun setOnAudioCompleteListener(listener: () -> Unit) {
         onAudioComplete = listener
@@ -203,5 +205,51 @@ class AudioService(private val context: Context) {
             mediaPlayer.release()
         }
         mediaPlayers.clear()
+    }
+
+    /**
+     * 降低音频音量（用于时间播报时降低背景音乐/闹钟铃声）
+     */
+    fun duckVolume(duckVolume: Float) {
+        if (isDucked) {
+            Log.d(TAG, "Audio already ducked, skipping")
+            return
+        }
+        
+        originalVolume = 1.0f
+        isDucked = true
+        
+        mediaPlayers.values.forEach { mediaPlayer ->
+            try {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.setVolume(duckVolume, duckVolume)
+                    Log.d(TAG, "Audio volume ducked to $duckVolume")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error ducking volume: $e")
+            }
+        }
+    }
+
+    /**
+     * 恢复音频音量
+     */
+    fun restoreVolume() {
+        if (!isDucked) {
+            return
+        }
+        
+        isDucked = false
+        
+        mediaPlayers.values.forEach { mediaPlayer ->
+            try {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.setVolume(originalVolume, originalVolume)
+                    Log.d(TAG, "Audio volume restored to $originalVolume")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error restoring volume: $e")
+            }
+        }
     }
 }

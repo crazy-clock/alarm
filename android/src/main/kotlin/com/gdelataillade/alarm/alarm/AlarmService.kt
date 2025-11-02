@@ -165,9 +165,12 @@ class AlarmService : Service() {
         // 启动时间播报服务（每10秒播报当前时间）
         timeAnnouncementService = TimeAnnouncementService(
             context = this,
+            audioService = audioService,
             volume = 0.8,
             speechRate = 1.0,
-            pitch = 1.0
+            pitch = 1.0,
+            loop = true,
+            loopInterval = 10000L  // 10秒
         )
         Log.d(TAG, "Time announcement service started")
 
