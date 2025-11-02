@@ -6,6 +6,7 @@ import com.gdelataillade.alarm.services.VibrationService
 import com.gdelataillade.alarm.services.VolumeService
 import com.gdelataillade.alarm.services.TTSService
 import com.gdelataillade.alarm.services.FlashlightService
+import com.gdelataillade.alarm.services.TimeAnnouncementService
 
 import android.app.Service
 import android.app.PendingIntent
@@ -40,6 +41,7 @@ class AlarmService : Service() {
     private var volumeService: VolumeService? = null
     private var ttsService: TTSService? = null
     private var flashlightService: FlashlightService? = null
+    private var timeAnnouncementService: TimeAnnouncementService? = null
     private var showSystemUI: Boolean = false
 
     override fun onCreate() {
@@ -159,6 +161,15 @@ class AlarmService : Service() {
                 alarmSettings.voiceTagSettings.loopInterval,
             )
         }
+
+        // 启动时间播报服务（每10秒播报当前时间）
+        timeAnnouncementService = TimeAnnouncementService(
+            context = this,
+            volume = 0.8,
+            speechRate = 1.0,
+            pitch = 1.0
+        )
+        Log.d(TAG, "Time announcement service started")
 
         // Request audio focus
         volumeService?.requestAudioFocus()
@@ -331,6 +342,7 @@ class AlarmService : Service() {
 
             flashlightService?.turnOffFlashlight()  // 关闭手电筒
             ttsService?.cleanup()  // 清理 TTS 资源
+            timeAnnouncementService?.cleanup()  // 清理时间播报服务
 
             stopForeground(true)
         } catch (e: IllegalStateException) {
@@ -350,6 +362,7 @@ class AlarmService : Service() {
         volumeService?.abandonAudioFocus()
         ttsService?.cleanup()  // 清理 TTS 资源
         flashlightService?.cleanup()  // 清理 FlashlightService
+        timeAnnouncementService?.cleanup()  // 清理时间播报服务
 
         AlarmRingingLiveData.instance.update(false)
 
