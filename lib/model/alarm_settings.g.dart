@@ -22,8 +22,11 @@ AlarmSettings _$AlarmSettingsFromJson(Map<String, dynamic> json) =>
               (v) => NotificationSettings.fromJson(v as Map<String, dynamic>)),
           voiceTagSettings: $checkedConvert('voiceTagSettings',
               (v) => VoiceTagSettings.fromJson(v as Map<String, dynamic>)),
-          timePressureSettings: $checkedConvert('timePressureSettings',
-              (v) => TimePressureSettings.fromJson(v as Map<String, dynamic>)),
+          timePressureSettings: $checkedConvert(
+              'timePressureSettings',
+              (v) => v == null
+                  ? const TimePressureSettings(enable: false)
+                  : TimePressureSettings.fromJson(v as Map<String, dynamic>)),
           loopAudio: $checkedConvert('loopAudio', (v) => v as bool? ?? true),
           vibrate: $checkedConvert('vibrate', (v) => v as bool? ?? true),
           warningNotificationOnKill: $checkedConvert(

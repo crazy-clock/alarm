@@ -21,7 +21,7 @@ class AlarmSettings extends Equatable {
     required this.volumeSettings,
     required this.notificationSettings,
     required this.voiceTagSettings,
-    required this.timePressureSettings,
+    this.timePressureSettings = const TimePressureSettings(enable: false),
     this.loopAudio = true,
     this.vibrate = true,
     this.warningNotificationOnKill = true,
