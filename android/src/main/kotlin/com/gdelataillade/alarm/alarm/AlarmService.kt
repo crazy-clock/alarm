@@ -167,6 +167,8 @@ class AlarmService : Service() {
         // 启动时间播报服务（每10秒播报当前时间）
         alarmSettings.timePressureSettings?.let { tp ->
             if (tp.enable) {
+                // 确保不会有旧的 TimeAnnouncementService 继续循环播放
+                timeAnnouncementService?.cleanup()
                 timeAnnouncementService = TimeAnnouncementService(
                     context = this,
                     volume = tp.volume,
@@ -327,6 +329,8 @@ class AlarmService : Service() {
             try {
                 if (tp.enable) {
                     Log.d(TAG, "[EditRingingAlarm] Starting timePressure for alarm ID: $id")
+                    // 更新时间压力播报时，先清理之前的实例，避免多个 TimeAnnouncementService 同时循环
+                    timeAnnouncementService?.cleanup()
                     timeAnnouncementService = TimeAnnouncementService(
                         context = this,
                         volume = tp.volume,
