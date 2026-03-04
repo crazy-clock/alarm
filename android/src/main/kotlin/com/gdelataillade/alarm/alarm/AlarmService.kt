@@ -163,17 +163,19 @@ class AlarmService : Service() {
         }
 
         // 启动时间播报服务（每10秒播报当前时间）
-        if (alarmSettings.timePressureSettings.enable) {
-            timeAnnouncementService = TimeAnnouncementService(
-                context = this,
-                audioService = audioService,
-                volume = alarmSettings.timePressureSettings.volume,
-                speechRate = alarmSettings.timePressureSettings.speechRate,
-                pitch = alarmSettings.timePressureSettings.pitch,
-                loop = alarmSettings.timePressureSettings.loop,
-                loopInterval = alarmSettings.timePressureSettings.loopInterval,
-            )
-            Log.d(TAG, "Time announcement service started")
+        alarmSettings.timePressureSettings?.let { tp ->
+            if (tp.enable) {
+                timeAnnouncementService = TimeAnnouncementService(
+                    context = this,
+                    volume = tp.volume,
+                    speechRate = tp.speechRate,
+                    pitch = tp.pitch,
+                    loop = tp.loop,
+                    loopInterval = tp.loopInterval,
+                    languageTag = tp.languageTag,
+                )
+                Log.d(TAG, "Time announcement service started")
+            }
         }
 
         // Request audio focus
@@ -310,25 +312,26 @@ class AlarmService : Service() {
         }
 
         // 5. 时间压力
-        if (settings.timePressureSettings != null) {
+        settings.timePressureSettings?.let { tp ->
             try {
-                if (settings.timePressureSettings.enable) {
+                if (tp.enable) {
                     Log.d(TAG, "[EditRingingAlarm] Starting timePressure for alarm ID: $id")
                     timeAnnouncementService = TimeAnnouncementService(
                         context = this,
-                        audioService = audioService,
-                        volume = settings.timePressureSettings.volume,
-                        speechRate = settings.timePressureSettings.speechRate,
-                        pitch = settings.timePressureSettings.pitch,
-                        loop = settings.timePressureSettings.loop,
-                        loopInterval = settings.timePressureSettings.loopInterval,
+                        volume = tp.volume,
+                        speechRate = tp.speechRate,
+                        pitch = tp.pitch,
+                        loop = tp.loop,
+                        loopInterval = tp.loopInterval,
+                        languageTag = tp.languageTag,
                     )
                 } else {
                     Log.d(TAG, "[EditRingingAlarm] Stop timePressure for alarm ID: $id")
                     timeAnnouncementService?.cleanup()
+                    timeAnnouncementService = null
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "[EditRingingAlarm] audio error. ${e.message}")
+                Log.e(TAG, "[EditRingingAlarm] timePressure error. ${e.message}")
             }
         }
 
@@ -351,6 +354,11 @@ class AlarmService : Service() {
 
     private fun stopAlarm(id: Int) {
         Log.e(TAG, "AlarmService stopAlarm $id")
+        ttsService?.cleanup()
+        ttsService = null
+        timeAnnouncementService?.cleanup()
+        timeAnnouncementService = null
+
         AlarmRingingLiveData.instance.update(false)
         try {
             val playingIds = audioService?.getPlayingMediaPlayersIds() ?: listOf()
@@ -369,8 +377,6 @@ class AlarmService : Service() {
             }
 
             flashlightService?.turnOffFlashlight()  // 关闭手电筒
-            ttsService?.cleanup()  // 清理 TTS 资源
-            timeAnnouncementService?.cleanup()  // 清理时间播报服务
 
             stopForeground(true)
         } catch (e: IllegalStateException) {
@@ -382,15 +388,18 @@ class AlarmService : Service() {
 
     override fun onDestroy() {
         Log.e(TAG, "AlarmService onDestroy")
+        ttsService?.cleanup()
+        ttsService = null
+        timeAnnouncementService?.cleanup()
+        timeAnnouncementService = null
+
         ringingAlarmIds = listOf()
 
         audioService?.cleanUp()
         vibrationService?.stopVibrating()
         volumeService?.restorePreviousVolume(showSystemUI)
         volumeService?.abandonAudioFocus()
-        ttsService?.cleanup()  // 清理 TTS 资源
         flashlightService?.cleanup()  // 清理 FlashlightService
-        timeAnnouncementService?.cleanup()  // 清理时间播报服务
 
         AlarmRingingLiveData.instance.update(false)
 
