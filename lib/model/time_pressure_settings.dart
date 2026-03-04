@@ -11,19 +11,21 @@ class TimePressureSettings extends Equatable {
   const TimePressureSettings({
     required this.enable,
     this.volume = 1.0,
-    this.speechRate = 0.1,
+    this.speechRate = 0.6,
     this.pitch = 1.0,
-    this.loop = false,
-    this.loopInterval = 1000,
+    this.loop = true,
+    this.loopInterval = 10000,
+    this.languageTag,
   });
 
   const TimePressureSettings._({
     required this.enable,
     this.volume = 1.0,
-    this.speechRate = 0.1,
+    this.speechRate = 0.6,
     this.pitch = 1.0,
-    this.loop = false,
-    this.loopInterval = 1000,
+    this.loop = true,
+    this.loopInterval = 10000,
+    this.languageTag,
   });
 
   /// Converts the JSON object to a `VolumeSettings` instance.
@@ -45,15 +47,25 @@ class TimePressureSettings extends Equatable {
   /// 是否循环播放
   final bool loop;
 
-  /// 循环播放间隔
+  /// 循环播放间隔（毫秒）
   final int loopInterval;
+
+  /// TTS 语言标签，如 zh-CN, en-US
+  final String? languageTag;
 
   /// Converts the [TimePressureSettings] instance to a JSON object.
   Map<String, dynamic> toJson() => _$TimePressureSettingsToJson(this);
 
   @override
-  List<Object?> get props =>
-      [enable, volume, speechRate, pitch, loop, loopInterval];
+  List<Object?> get props => [
+        enable,
+        volume,
+        speechRate,
+        pitch,
+        loop,
+        loopInterval,
+        languageTag,
+      ];
 
   /// Converts to wire datatype which is used for host platform communication.
   TimePressureSettingsWire toWire() => TimePressureSettingsWire(
@@ -63,5 +75,6 @@ class TimePressureSettings extends Equatable {
         pitch: pitch,
         loop: loop,
         loopInterval: loopInterval,
+        languageTag: languageTag,
       );
 }

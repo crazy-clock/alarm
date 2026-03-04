@@ -34,7 +34,8 @@ class EditRingingAlarmSettings extends Equatable {
   });
 
   /// Converts the JSON object to a `EditRingingAlarmSettings` instance.
-  factory EditRingingAlarmSettings.fromJson(Map<String, dynamic> json) => _$EditRingingAlarmSettingsFromJson(json);
+  factory EditRingingAlarmSettings.fromJson(Map<String, dynamic> json) =>
+      _$EditRingingAlarmSettingsFromJson(json);
 
   /// id
   final int id;
@@ -64,7 +65,16 @@ class EditRingingAlarmSettings extends Equatable {
   Map<String, dynamic> toJson() => _$EditRingingAlarmSettingsToJson(this);
 
   @override
-  List<Object?> get props => [id, volumeSettings, assetAudioPath, loopAudio, vibrate, flashlight, voiceTagSettings, timePressureSettings];
+  List<Object?> get props => [
+        id,
+        volumeSettings,
+        assetAudioPath,
+        loopAudio,
+        vibrate,
+        flashlight,
+        voiceTagSettings,
+        timePressureSettings,
+      ];
 
   /// Converts to wire datatype which is used for host platform communication.
   EditRingingAlarmSettingsWire toWire() => EditRingingAlarmSettingsWire(

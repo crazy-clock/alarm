@@ -17,12 +17,13 @@ TimePressureSettings _$TimePressureSettingsFromJson(
           volume:
               $checkedConvert('volume', (v) => (v as num?)?.toDouble() ?? 1.0),
           speechRate: $checkedConvert(
-              'speechRate', (v) => (v as num?)?.toDouble() ?? 0.1),
+              'speechRate', (v) => (v as num?)?.toDouble() ?? 0.6),
           pitch:
               $checkedConvert('pitch', (v) => (v as num?)?.toDouble() ?? 1.0),
-          loop: $checkedConvert('loop', (v) => v as bool? ?? false),
+          loop: $checkedConvert('loop', (v) => v as bool? ?? true),
           loopInterval: $checkedConvert(
-              'loopInterval', (v) => (v as num?)?.toInt() ?? 1000),
+              'loopInterval', (v) => (v as num?)?.toInt() ?? 10000),
+          languageTag: $checkedConvert('languageTag', (v) => v as String?),
         );
         return val;
       },
@@ -37,4 +38,5 @@ Map<String, dynamic> _$TimePressureSettingsToJson(
       'pitch': instance.pitch,
       'loop': instance.loop,
       'loopInterval': instance.loopInterval,
+      if (instance.languageTag case final value?) 'languageTag': value,
     };

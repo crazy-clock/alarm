@@ -30,7 +30,7 @@ data class AlarmSettings(
     val allowAlarmOverlap: Boolean = false, // Defaults to false for backward compatibility
     val voiceTagSettings: VoiceTagSettings,
     val flashlight: Boolean,
-    val timePressureSettings: TimePressureSettings,
+    val timePressureSettings: TimePressureSettings? = null
 ) {
     companion object {
         fun fromWire(e: AlarmSettingsWire): AlarmSettings {
@@ -47,7 +47,7 @@ data class AlarmSettings(
                 e.allowAlarmOverlap,
                 VoiceTagSettings.fromWire(e.voiceTagSettings),
                 e.flashlight,
-                TimePressureSettings.fromWire(e.timePressureSettings),
+                e.timePressureSettings?.let { TimePressureSettings.fromWire(it) }
             )
         }
 

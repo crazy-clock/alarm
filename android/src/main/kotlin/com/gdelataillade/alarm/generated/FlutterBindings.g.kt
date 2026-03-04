@@ -90,7 +90,7 @@ data class AlarmSettingsWire (
   val iOSBackgroundAudio: Boolean,
   val voiceTagSettings: VoiceTagSettingsWire,
   val flashlight: Boolean,
-  val timePressureSettings: TimePressureSettingsWire
+  val timePressureSettings: TimePressureSettingsWire? = null
 )
  {
   companion object {
@@ -108,7 +108,7 @@ data class AlarmSettingsWire (
       val iOSBackgroundAudio = pigeonVar_list[10] as Boolean
       val voiceTagSettings = pigeonVar_list[11] as VoiceTagSettingsWire
       val flashlight = pigeonVar_list[12] as Boolean
-      val timePressureSettings = pigeonVar_list[13] as TimePressureSettingsWire
+      val timePressureSettings = pigeonVar_list[13] as TimePressureSettingsWire?
       return AlarmSettingsWire(id, millisecondsSinceEpoch, assetAudioPath, volumeSettings, notificationSettings, loopAudio, vibrate, warningNotificationOnKill, androidFullScreenIntent, allowAlarmOverlap, iOSBackgroundAudio, voiceTagSettings, flashlight, timePressureSettings)
     }
   }
@@ -223,7 +223,8 @@ data class TimePressureSettingsWire (
   val speechRate: Double,
   val pitch: Double,
   val loop: Boolean,
-  val loopInterval: Long
+  val loopInterval: Long,
+  val languageTag: String? = null
 )
  {
   companion object {
@@ -234,7 +235,8 @@ data class TimePressureSettingsWire (
       val pitch = pigeonVar_list[3] as Double
       val loop = pigeonVar_list[4] as Boolean
       val loopInterval = pigeonVar_list[5] as Long
-      return TimePressureSettingsWire(enable, volume, speechRate, pitch, loop, loopInterval)
+      val languageTag = pigeonVar_list[6] as String?
+      return TimePressureSettingsWire(enable, volume, speechRate, pitch, loop, loopInterval, languageTag)
     }
   }
   fun toList(): List<Any?> {
@@ -245,6 +247,7 @@ data class TimePressureSettingsWire (
       pitch,
       loop,
       loopInterval,
+      languageTag,
     )
   }
 }

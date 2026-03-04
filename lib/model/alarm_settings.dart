@@ -21,7 +21,7 @@ class AlarmSettings extends Equatable {
     required this.volumeSettings,
     required this.notificationSettings,
     required this.voiceTagSettings,
-    this.timePressureSettings = const TimePressureSettings(enable: false),
+    this.timePressureSettings,
     this.loopAudio = true,
     this.vibrate = true,
     this.warningNotificationOnKill = true,
@@ -45,7 +45,10 @@ class AlarmSettings extends Equatable {
 
       final volume = (json['volume'] as num?)?.toDouble();
       final fadeDurationSeconds = (json['fadeDuration'] as num?)?.toDouble();
-      final fadeDurationMillis = (fadeDurationSeconds != null && fadeDurationSeconds > 0) ? (fadeDurationSeconds * 1000).toInt() : null;
+      final fadeDurationMillis =
+          (fadeDurationSeconds != null && fadeDurationSeconds > 0)
+              ? (fadeDurationSeconds * 1000).toInt()
+              : null;
       final volumeEnforced = json['volumeEnforced'] as bool? ?? false;
 
       json['volumeSettings'] = {
@@ -180,8 +183,8 @@ class AlarmSettings extends Equatable {
   /// 是否开启手电筒
   final bool flashlight;
 
-  /// 时间压力设置
-  final TimePressureSettings timePressureSettings;
+  /// 时间压力设置（时间播报）
+  final TimePressureSettings? timePressureSettings;
 
   /// Converts the `AlarmSettings` instance to a JSON object.
   Map<String, dynamic> toJson() => _$AlarmSettingsToJson(this);
@@ -201,7 +204,7 @@ class AlarmSettings extends Equatable {
         iOSBackgroundAudio: iOSBackgroundAudio,
         voiceTagSettings: voiceTagSettings.toWire(),
         flashlight: flashlight,
-        timePressureSettings: timePressureSettings.toWire(),
+        timePressureSettings: timePressureSettings?.toWire(),
       );
 
   /// Creates a copy of `AlarmSettings` but with the given fields replaced with
@@ -238,8 +241,10 @@ class AlarmSettings extends Equatable {
       notificationSettings: notificationSettings ?? this.notificationSettings,
       loopAudio: loopAudio ?? this.loopAudio,
       vibrate: vibrate ?? this.vibrate,
-      warningNotificationOnKill: warningNotificationOnKill ?? this.warningNotificationOnKill,
-      androidFullScreenIntent: androidFullScreenIntent ?? this.androidFullScreenIntent,
+      warningNotificationOnKill:
+          warningNotificationOnKill ?? this.warningNotificationOnKill,
+      androidFullScreenIntent:
+          androidFullScreenIntent ?? this.androidFullScreenIntent,
       allowAlarmOverlap: allowAlarmOverlap ?? this.allowAlarmOverlap,
       iOSBackgroundAudio: iOSBackgroundAudio ?? this.iOSBackgroundAudio,
       payload: payload?.call() ?? this.payload,

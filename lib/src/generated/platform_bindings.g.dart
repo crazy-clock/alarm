@@ -64,7 +64,7 @@ class AlarmSettingsWire {
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
     required this.flashlight,
-    required this.timePressureSettings,
+    this.timePressureSettings,
   });
 
   int id;
@@ -93,7 +93,7 @@ class AlarmSettingsWire {
 
   bool flashlight;
 
-  TimePressureSettingsWire timePressureSettings;
+  TimePressureSettingsWire? timePressureSettings;
 
   Object encode() {
     return <Object?>[
@@ -130,7 +130,7 @@ class AlarmSettingsWire {
       iOSBackgroundAudio: result[10]! as bool,
       voiceTagSettings: result[11]! as VoiceTagSettingsWire,
       flashlight: result[12]! as bool,
-      timePressureSettings: result[13]! as TimePressureSettingsWire,
+      timePressureSettings: result[13] as TimePressureSettingsWire?,
     );
   }
 }
@@ -256,6 +256,7 @@ class TimePressureSettingsWire {
     required this.pitch,
     required this.loop,
     required this.loopInterval,
+    this.languageTag,
   });
 
   bool enable;
@@ -270,6 +271,8 @@ class TimePressureSettingsWire {
 
   int loopInterval;
 
+  String? languageTag;
+
   Object encode() {
     return <Object?>[
       enable,
@@ -278,6 +281,7 @@ class TimePressureSettingsWire {
       pitch,
       loop,
       loopInterval,
+      languageTag,
     ];
   }
 
@@ -290,6 +294,7 @@ class TimePressureSettingsWire {
       pitch: result[3]! as double,
       loop: result[4]! as bool,
       loopInterval: result[5]! as int,
+      languageTag: result[6] as String?,
     );
   }
 }

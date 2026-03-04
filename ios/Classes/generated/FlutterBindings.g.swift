@@ -101,7 +101,7 @@ struct AlarmSettingsWire {
   var iOSBackgroundAudio: Bool
   var voiceTagSettings: VoiceTagSettingsWire
   var flashlight: Bool
-  var timePressureSettings: TimePressureSettingsWire
+  var timePressureSettings: TimePressureSettingsWire? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -119,7 +119,7 @@ struct AlarmSettingsWire {
     let iOSBackgroundAudio = pigeonVar_list[10] as! Bool
     let voiceTagSettings = pigeonVar_list[11] as! VoiceTagSettingsWire
     let flashlight = pigeonVar_list[12] as! Bool
-    let timePressureSettings = pigeonVar_list[13] as! TimePressureSettingsWire
+    let timePressureSettings: TimePressureSettingsWire? = nilOrValue(pigeonVar_list[13])
 
     return AlarmSettingsWire(
       id: id,
@@ -266,6 +266,7 @@ struct TimePressureSettingsWire {
   var pitch: Double
   var loop: Bool
   var loopInterval: Int64
+  var languageTag: String? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -276,6 +277,7 @@ struct TimePressureSettingsWire {
     let pitch = pigeonVar_list[3] as! Double
     let loop = pigeonVar_list[4] as! Bool
     let loopInterval = pigeonVar_list[5] as! Int64
+    let languageTag: String? = nilOrValue(pigeonVar_list[6])
 
     return TimePressureSettingsWire(
       enable: enable,
@@ -283,7 +285,8 @@ struct TimePressureSettingsWire {
       speechRate: speechRate,
       pitch: pitch,
       loop: loop,
-      loopInterval: loopInterval
+      loopInterval: loopInterval,
+      languageTag: languageTag
     )
   }
   func toList() -> [Any?] {
@@ -294,6 +297,7 @@ struct TimePressureSettingsWire {
       pitch,
       loop,
       loopInterval,
+      languageTag,
     ]
   }
 }

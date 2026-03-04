@@ -11,6 +11,7 @@ data class TimePressureSettings(
     val pitch: Double,
     val loop: Boolean,
     val loopInterval: Long,
+    val languageTag: String? = null,
 ) {
     companion object {
         fun fromWire(e: TimePressureSettingsWire): TimePressureSettings {
@@ -20,7 +21,8 @@ data class TimePressureSettings(
                 e.speechRate,
                 e.pitch,
                 e.loop,
-                e.loopInterval,
+                e.loopInterval.toLong(),
+                e.languageTag,
             )
         }
     }

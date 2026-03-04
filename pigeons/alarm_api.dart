@@ -30,7 +30,7 @@ class AlarmSettingsWire {
     required this.iOSBackgroundAudio,
     required this.voiceTagSettings,
     required this.flashlight,
-    required this.timePressureSettings,
+    this.timePressureSettings,
   });
 
   final int id;
@@ -46,7 +46,7 @@ class AlarmSettingsWire {
   final bool iOSBackgroundAudio;
   final VoiceTagSettingsWire voiceTagSettings;
   final bool flashlight;
-  final TimePressureSettingsWire timePressureSettings;
+  final TimePressureSettingsWire? timePressureSettings;
 }
 
 class VolumeSettingsWire {
@@ -101,6 +101,7 @@ class TimePressureSettingsWire {
     required this.pitch,
     required this.loop,
     required this.loopInterval,
+    this.languageTag,
   });
 
   final bool enable;
@@ -109,6 +110,7 @@ class TimePressureSettingsWire {
   final double pitch;
   final bool loop;
   final int loopInterval;
+  final String? languageTag; // TTS 语言标签，如 zh-CN, en-US
 }
 
 class NotificationSettingsWire {
