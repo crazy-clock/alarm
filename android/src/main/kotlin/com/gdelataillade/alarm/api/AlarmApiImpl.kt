@@ -39,12 +39,20 @@ class AlarmApiImpl(private val context: Context) : AlarmApi {
     override fun stopAlarm(alarmId: Long) {
         val id = alarmId.toInt()
         var alarmWasRinging = false
-        if (AlarmService.ringingAlarmIds.contains(id)) {
+        // Bug2 修复：改为实时查询，避免内存状态失效导致正在响铃的闹钟无法被停止
+        if (AlarmService.getRingingAlarmIds().contains(id)) {
             alarmWasRinging = true
             val stopIntent = Intent(context, AlarmService::class.java)
             stopIntent.action = "STOP_ALARM"
             stopIntent.putExtra("id", id)
-            context.stopService(stopIntent)
+            // ✅ Fix Bug3: 必须用 startService/startForegroundService 发送 STOP_ALARM intent，
+            // 让 onStartCommand 处理停止逻辑（unsaveAlarm + alarmStopped 回调）。
+            // stopService() 只触发 onDestroy，不触发 onStartCommand，导致停止逻辑永远不执行。
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(stopIntent)
+            } else {
+                context.startService(stopIntent)
+            }
         }
 
         // Intent to cancel the future alarm if it's set
@@ -94,11 +102,9 @@ class AlarmApiImpl(private val context: Context) : AlarmApi {
     }
 
     override fun isRinging(alarmId: Long?): Boolean {
-        val ringingAlarmIds = AlarmService.ringingAlarmIds
-        if (alarmId == null) {
-            return ringingAlarmIds.isNotEmpty()
-        }
-        return ringingAlarmIds.contains(alarmId.toInt())
+        // Bug2 修复：改为实时查询 AudioService 的播放状态，
+        // 避免进程重启后 ringingAlarmIds 内存状态丢失导致的误判。
+        return AlarmService.isAlarmRinging(alarmId?.toInt())
     }
 
     override fun setWarningNotificationOnKill(title: String, body: String) {

@@ -20,6 +20,9 @@ class AudioService(private val context: Context) {
     private val mediaPlayers = ConcurrentHashMap<Int, MediaPlayer>()
     private val timers = ConcurrentHashMap<Int, Timer>()
 
+    // 追踪 volume=0 的静音闹铃（挑战模式下铃声被暂停，但闹铃仍在"响铃"状态）
+    private val silentAlarmIds = ConcurrentHashMap.newKeySet<Int>()
+
     private var onAudioComplete: (() -> Unit)? = null
     private var originalVolume: Float = 1.0f
     private var isDucked: Boolean = false
@@ -29,11 +32,17 @@ class AudioService(private val context: Context) {
     }
 
     fun isMediaPlayerEmpty(): Boolean {
-        return mediaPlayers.isEmpty()
+        // 同时检查真实播放的 MediaPlayer 和静音闹铃
+        return mediaPlayers.isEmpty() && silentAlarmIds.isEmpty()
     }
 
     fun getPlayingMediaPlayersIds(): List<Int> {
-        return mediaPlayers.filter { (_, _) -> true }.keys.toList()
+        // 只返回真正在播放（isPlaying=true）的 MediaPlayer id，过滤掉空/已停止的实例
+        val playingIds = mediaPlayers.filter { (_, mp) ->
+            try { mp.isPlaying } catch (e: IllegalStateException) { false }
+        }.keys.toList()
+        // 合并静音闹铃 id（volume=0 时闹铃仍处于"响铃"状态，需要被 isRinging 感知到）
+        return (playingIds + silentAlarmIds.toList()).distinct()
     }
 
     fun playAudio(
@@ -46,8 +55,10 @@ class AudioService(private val context: Context) {
     ) {
         stopAudio(id) // Stop and release any existing MediaPlayer and Timer for this ID
         if (volume != null && volume <= 0) {
-            Log.d(TAG, "AudioService playAudio, volume = 0, just stop the audio")
-            mediaPlayers[id] = MediaPlayer()
+            // volume=0 表示挑战模式下铃声被静音，但闹铃仍在响铃状态
+            // 不放入 mediaPlayers（避免空 MediaPlayer 污染状态），改用 silentAlarmIds 追踪
+            Log.d(TAG, "AudioService playAudio, volume = 0, tracking as silent alarm id=$id")
+            silentAlarmIds.add(id)
             return
         }
 
@@ -117,13 +128,18 @@ class AudioService(private val context: Context) {
         timers.remove(id)
 
         mediaPlayers[id]?.apply {
-            if (isPlaying) {
-                stop()
+            try {
+                if (isPlaying) stop()
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "stopAudio: MediaPlayer illegal state for id=$id: ${e.message}")
             }
             reset()
             release()
         }
         mediaPlayers.remove(id)
+
+        // 同步清理静音闹铃追踪
+        silentAlarmIds.remove(id)
     }
 
     private fun startFadeIn(mediaPlayer: MediaPlayer, duration: Duration, timer: Timer) {
@@ -198,13 +214,18 @@ class AudioService(private val context: Context) {
         timers.clear()
 
         mediaPlayers.values.forEach { mediaPlayer ->
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.stop()
+            try {
+                if (mediaPlayer.isPlaying) mediaPlayer.stop()
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "cleanUp: MediaPlayer illegal state: ${e.message}")
             }
             mediaPlayer.reset()
             mediaPlayer.release()
         }
         mediaPlayers.clear()
+
+        // 同步清理静音闹铃追踪
+        silentAlarmIds.clear()
     }
 
     /**

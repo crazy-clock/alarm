@@ -33,7 +33,37 @@ class AlarmService : Service() {
         var instance: AlarmService? = null
 
         @JvmStatic
+        @Deprecated("Use getRingingAlarmIds() for real-time state; this field is kept for backward compatibility only.")
         var ringingAlarmIds: List<Int> = listOf()
+
+        /**
+         * 实时查询当前正在播放音频的闹钟 ID 列表。
+         * 优先从 AudioService 实时获取，避免进程重启后内存状态丢失导致的误判。
+         * 当 AlarmService 实例不存在时（进程刚重启），回退到静态缓存列表。
+         */
+        @JvmStatic
+        fun getRingingAlarmIds(): List<Int> {
+            val liveIds = instance?.audioService?.getPlayingMediaPlayersIds()
+            return if (liveIds != null) {
+                // 同步更新静态缓存，保持一致性
+                @Suppress("DEPRECATION")
+                ringingAlarmIds = liveIds
+                liveIds
+            } else {
+                @Suppress("DEPRECATION")
+                ringingAlarmIds
+            }
+        }
+
+        /**
+         * 判断指定 id 的闹钟是否正在响铃（实时查询）。
+         * 传入 null 时判断是否有任意闹钟在响。
+         */
+        @JvmStatic
+        fun isAlarmRinging(alarmId: Int?): Boolean {
+            val ids = getRingingAlarmIds()
+            return if (alarmId == null) ids.isNotEmpty() else ids.contains(alarmId)
+        }
     }
 
     private var audioService: AudioService? = null
@@ -121,7 +151,7 @@ class AlarmService : Service() {
         }
 
         // Check if an alarm is already ringing
-        if (!alarmSettings.allowAlarmOverlap && ringingAlarmIds.isNotEmpty() && action != "STOP_ALARM") {
+        if (!alarmSettings.allowAlarmOverlap && getRingingAlarmIds().isNotEmpty() && action != "STOP_ALARM") {
             Log.d(TAG, "An alarm is already ringing. Ignoring new alarm with id: $id")
             unsaveAlarm(id)
             return START_NOT_STICKY
@@ -211,6 +241,7 @@ class AlarmService : Service() {
         )
 
         // Update the list of ringing alarms
+        @Suppress("DEPRECATION")
         ringingAlarmIds = audioService?.getPlayingMediaPlayersIds() ?: listOf()
 
         // Start vibration if enabled
@@ -376,14 +407,16 @@ class AlarmService : Service() {
 
         AlarmRingingLiveData.instance.update(false)
         try {
+            audioService?.stopAudio(id)
+
+            // 停止音频后实时刷新静态缓存
             val playingIds = audioService?.getPlayingMediaPlayersIds() ?: listOf()
+            @Suppress("DEPRECATION")
             ringingAlarmIds = playingIds
 
             // Safely call methods on 'volumeService' and 'audioService'
             volumeService?.restorePreviousVolume(showSystemUI)
             volumeService?.abandonAudioFocus()
-
-            audioService?.stopAudio(id)
 
             // Check if media player is empty safely
             if (audioService?.isMediaPlayerEmpty() == true) {

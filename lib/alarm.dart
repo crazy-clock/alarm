@@ -65,6 +65,12 @@ class Alarm {
 
   /// Checks if some alarms were set on previous session.
   /// If it's the case then reschedules them.
+  ///
+  /// Android 冷启动竞态保护：
+  /// App 启动时，AlarmManager 可能已触发广播并正在拉起 AlarmService（异步），
+  /// 此时 ringingAlarmIds 尚未更新，isRinging() 会误返回 false，
+  /// 导致正在响铃的闹铃被 stop() 从存储中删除，响铃页面无法弹出。
+  /// 修复方案：对过期闹铃采用带重试的等待策略，给 AlarmService 足够的启动时间。
   static Future<void> checkAlarm() async {
     final alarms = await getAlarms();
 
@@ -75,13 +81,36 @@ class Alarm {
       if (alarm.dateTime.isAfter(now)) {
         await set(alarmSettings: alarm);
       } else {
-        if (await Alarm.isRinging(alarm.id)) {
+        // 对于已过期的闹铃，使用带重试的等待策略，避免冷启动竞态误删
+        final ringing = await _isRingingWithRetry(alarm.id);
+        if (ringing) {
           _ringing.add(_ringing.value.add(alarm));
           ringStream.add(alarm);
         } else {
           await stop(alarm.id);
         }
       }
+    }
+  }
+
+  /// 带重试的 isRinging 检查，专用于冷启动场景。
+  ///
+  /// Android 上 AlarmService 是异步启动的前台服务，App 进入前台时
+  /// ringingAlarmIds 可能尚未被填充。最多等待 [maxWaitMs] 毫秒，
+  /// 每隔 [intervalMs] 毫秒重试一次，一旦确认响铃立即返回 true。
+  static Future<bool> _isRingingWithRetry(
+    int id, {
+    int maxWaitMs = 3000,
+    int intervalMs = 500,
+  }) async {
+    if (iOS) return AndroidAlarm.isRinging(id); // iOS 无此竞态问题
+
+    final deadline = DateTime.now().add(Duration(milliseconds: maxWaitMs));
+    while (true) {
+      final ringing = await AndroidAlarm.isRinging(id);
+      if (ringing) return true;
+      if (DateTime.now().isAfter(deadline)) return false;
+      await Future<void>.delayed(Duration(milliseconds: intervalMs));
     }
   }
 
