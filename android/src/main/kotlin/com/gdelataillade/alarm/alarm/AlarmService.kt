@@ -44,8 +44,18 @@ class AlarmService : Service() {
     private var timeAnnouncementService: TimeAnnouncementService? = null
     private var showSystemUI: Boolean = false
 
+    /**
+     * 持有正在响铃期间的 PARTIAL_WAKE_LOCK。
+     * 旧实现里 `wakeLock.acquire(5*60*1000)` 之后没有保存引用，
+     * 一旦用户在 5 分钟之内手动关掉闹钟，这个 wakeLock 仍然要等到超时才释放，
+     * 期间持续阻止 CPU 休眠 → 用户感知发烫 + 耗电。
+     * 现在显式保存引用，并在 stopAlarm / onDestroy 时主动 release。
+     */
+    private var ringingWakeLock: PowerManager.WakeLock? = null
+
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "AlarmService onCreate")
 
         instance = this
         audioService = AudioService(this)
@@ -55,7 +65,9 @@ class AlarmService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand intent=${intent != null} flags=$flags startId=$startId")
         if (intent == null) {
+            Log.w(TAG, "onStartCommand: intent is null, stopSelf")
             stopSelf()
             return START_NOT_STICKY
         }
@@ -150,35 +162,48 @@ class AlarmService : Service() {
         }
 
         // 如果开启了语音标签，则播放语音标签
+        // 重要：必须 try-catch，否则 TTS 引擎缺失/初始化崩溃会让下面的
+        // audioService.playAudio() 没机会执行，导致主铃声变成"哑巴闹钟"。
         if (alarmSettings.voiceTagSettings.enable) {
             // 确保不会有旧的 TTSService 继续循环播放
             ttsService?.cleanup()
-            ttsService = TTSService(
-                this,
-                alarmSettings.voiceTagSettings.text,
-                alarmSettings.voiceTagSettings.volume,
-                alarmSettings.voiceTagSettings.speechRate,
-                alarmSettings.voiceTagSettings.pitch,
-                alarmSettings.voiceTagSettings.loop,
-                alarmSettings.voiceTagSettings.loopInterval,
-            )
+            try {
+                ttsService = TTSService(
+                    this,
+                    alarmSettings.voiceTagSettings.text,
+                    alarmSettings.voiceTagSettings.volume,
+                    alarmSettings.voiceTagSettings.speechRate,
+                    alarmSettings.voiceTagSettings.pitch,
+                    alarmSettings.voiceTagSettings.loop,
+                    alarmSettings.voiceTagSettings.loopInterval,
+                )
+            } catch (t: Throwable) {
+                Log.e(TAG, "Init TTSService failed, fallback to silent voice tag: ${t.message}", t)
+                ttsService = null
+            }
         }
 
         // 启动时间播报服务（每10秒播报当前时间）
+        // 同样必须 try-catch，理由同上。
         alarmSettings.timePressureSettings?.let { tp ->
             if (tp.enable) {
                 // 确保不会有旧的 TimeAnnouncementService 继续循环播放
                 timeAnnouncementService?.cleanup()
-                timeAnnouncementService = TimeAnnouncementService(
-                    context = this,
-                    volume = tp.volume,
-                    speechRate = tp.speechRate,
-                    pitch = tp.pitch,
-                    loop = tp.loop,
-                    loopInterval = tp.loopInterval,
-                    languageTag = tp.languageTag,
-                )
-                Log.d(TAG, "Time announcement service started")
+                try {
+                    timeAnnouncementService = TimeAnnouncementService(
+                        context = this,
+                        volume = tp.volume,
+                        speechRate = tp.speechRate,
+                        pitch = tp.pitch,
+                        loop = tp.loop,
+                        loopInterval = tp.loopInterval,
+                        languageTag = tp.languageTag,
+                    )
+                    Log.d(TAG, "Time announcement service started")
+                } catch (t: Throwable) {
+                    Log.e(TAG, "Init TimeAnnouncementService failed, fallback to silent: ${t.message}", t)
+                    timeAnnouncementService = null
+                }
             }
         }
 
@@ -221,12 +246,38 @@ class AlarmService : Service() {
             Log.d(TAG, "Vibration disabled for alarm ID: $id")
         }
 
-        // Acquire a wake lock to wake up the device
-        val wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:AlarmWakelockTag")
-        wakeLock.acquire(5 * 60 * 1000L) // Acquire for 5 minutes
+        // 抓 WakeLock 防止系统在响铃期间让 CPU 休眠。
+        // 关键：把引用存到字段里，stopAlarm / onDestroy 时主动 release，
+        // 避免用户提前关闹钟后还要等 5 分钟超时才释放。
+        try {
+            // 兜底：如果上一轮的 WakeLock 还在，先释放掉
+            releaseRingingWakeLock()
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            val wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "app:AlarmWakelockTag")
+            wl.setReferenceCounted(false)
+            wl.acquire(5 * 60 * 1000L) // 最长 5 分钟兜底，正常流程会被主动 release
+            ringingWakeLock = wl
+        } catch (t: Throwable) {
+            Log.e(TAG, "Acquire ringing WakeLock failed: ${t.message}", t)
+            ringingWakeLock = null
+        }
 
         return START_STICKY
+    }
+
+    /**
+     * 释放响铃 WakeLock。stopAlarm / onDestroy 都要调一次，
+     * 多次调用安全。
+     */
+    private fun releaseRingingWakeLock() {
+        val wl = ringingWakeLock ?: return
+        try {
+            if (wl.isHeld) wl.release()
+        } catch (t: Throwable) {
+            Log.e(TAG, "Release ringing WakeLock failed: ${t.message}", t)
+        } finally {
+            ringingWakeLock = null
+        }
     }
 
     private fun startAlarmService(id: Int, notification: Notification) {
@@ -374,6 +425,9 @@ class AlarmService : Service() {
         timeAnnouncementService?.cleanup()
         timeAnnouncementService = null
 
+        // 用户提前关闹钟时主动释放，避免 5 分钟超时空耗电
+        releaseRingingWakeLock()
+
         AlarmRingingLiveData.instance.update(false)
         try {
             val playingIds = audioService?.getPlayingMediaPlayersIds() ?: listOf()
@@ -407,6 +461,9 @@ class AlarmService : Service() {
         ttsService = null
         timeAnnouncementService?.cleanup()
         timeAnnouncementService = null
+
+        // 服务销毁时兜底释放 WakeLock
+        releaseRingingWakeLock()
 
         ringingAlarmIds = listOf()
 

@@ -14,7 +14,9 @@
   <uses-feature android:name="android.hardware.camera" />
   <uses-feature android:name="android.hardware.camera.flash" />
   <application>
-    <receiver android:name=".AlarmReceiver" android:exported="true" />
+    <!-- exported="false"：AlarmReceiver 仅由系统 AlarmManager 通过 PendingIntent 唤起，
+         不需要让第三方 app 直接发广播触发，避免被外部伪造闹钟触发。 -->
+    <receiver android:name=".AlarmReceiver" android:exported="false" />
 
     <service
       android:name=".AlarmService"
