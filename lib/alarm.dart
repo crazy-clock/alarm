@@ -266,11 +266,11 @@ class Alarm {
   /// If an `id` is provided, it checks if the specific alarm with that `id`
   /// is ringing.
   static Future<void> editRingingAlarm(
-      {required EditRingingAlarmSettings editRingingAlarmSettings}) async {
+      {required EditRingingAlarmSettings editRingingAlarmSettings,}) async {
     if (iOS) {
-      throw const AlarmException(AlarmErrorCode.notSupport,
-          message: '暂不支持 IOS');
+      await IOSAlarm.editRingingAlarm(editRingingAlarmSettings);
+    } else {
+      await AndroidAlarm.editRingingAlarm(editRingingAlarmSettings);
     }
-    await AndroidAlarm.editRingingAlarm(editRingingAlarmSettings);
   }
 }

@@ -9,6 +9,13 @@ class AlarmConfiguration {
     var volumeEnforcementTimer: Timer?
     var task: DispatchWorkItem?
 
+    // TTS service for voice tag
+    var ttsService: TTSService?
+    // Time announcement service
+    var timeAnnouncementService: TimeAnnouncementService?
+    // Flashlight service
+    var flashlightService: FlashlightService?
+
     init(settings: AlarmSettings) {
         self.settings = settings
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
+import 'package:alarm/model/edit_ringing_alarm_settings.dart';
 import 'package:alarm/src/generated/platform_bindings.g.dart';
 import 'package:alarm/utils/alarm_exception.dart';
 import 'package:alarm/utils/alarm_handler.dart';
@@ -69,5 +70,13 @@ class IOSAlarm {
   static Future<void> setWarningNotificationOnKill(String title, String body) =>
       _api
           .setWarningNotificationOnKill(title: title, body: body)
+          .catchError(AlarmExceptionHandlers.catchError<void>);
+
+  /// Edits the behavior of a currently ringing alarm (toggle: vibrate/audio/flashlight/TTS/time announcement).
+  static Future<void> editRingingAlarm(
+          EditRingingAlarmSettings settings,) =>
+      _api
+          .editRingingAlarm(
+              editRingingAlarmSettingsWire: settings.toWire(),)
           .catchError(AlarmExceptionHandlers.catchError<void>);
 }

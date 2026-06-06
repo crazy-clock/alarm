@@ -12,11 +12,15 @@ struct AlarmSettings: Codable {
     let androidFullScreenIntent: Bool
     let allowAlarmOverlap: Bool
     let iOSBackgroundAudio: Bool
+    let voiceTagSettings: VoiceTagSettings
+    let flashlight: Bool
+    let timePressureSettings: TimePressureSettings?
 
     enum CodingKeys: String, CodingKey {
         case id, dateTime, assetAudioPath, volumeSettings, notificationSettings,
              loopAudio, vibrate, warningNotificationOnKill, androidFullScreenIntent,
-             allowAlarmOverlap, iOSBackgroundAudio, volume, fadeDuration, volumeEnforced
+             allowAlarmOverlap, iOSBackgroundAudio, voiceTagSettings, flashlight,
+             timePressureSettings, volume, fadeDuration, volumeEnforced
     }
 
     /// Custom initializer to handle backward compatibility for older models
@@ -52,10 +56,27 @@ struct AlarmSettings: Codable {
             volumeSettings = VolumeSettings(
                 volume: volume,
                 fadeDuration: fadeDuration,
-                fadeSteps: [], // No equivalent for fadeSteps in older models
+                fadeSteps: [],
                 volumeEnforced: volumeEnforced
             )
         }
+
+        // Backward compatibility for `voiceTagSettings`
+        voiceTagSettings = try container.decodeIfPresent(VoiceTagSettings.self, forKey: .voiceTagSettings) ?? VoiceTagSettings(
+            enable: false,
+            text: "",
+            volume: 1.0,
+            speechRate: 1.0,
+            pitch: 1.0,
+            loop: false,
+            loopInterval: 1000
+        )
+
+        // Backward compatibility for `flashlight`
+        flashlight = try container.decodeIfPresent(Bool.self, forKey: .flashlight) ?? false
+
+        // Backward compatibility for `timePressureSettings`
+        timePressureSettings = try container.decodeIfPresent(TimePressureSettings.self, forKey: .timePressureSettings)
     }
 
     /// Encode method to support `Encodable` protocol
@@ -73,6 +94,9 @@ struct AlarmSettings: Codable {
         try container.encode(androidFullScreenIntent, forKey: .androidFullScreenIntent)
         try container.encode(allowAlarmOverlap, forKey: .allowAlarmOverlap)
         try container.encode(iOSBackgroundAudio, forKey: .iOSBackgroundAudio)
+        try container.encode(voiceTagSettings, forKey: .voiceTagSettings)
+        try container.encode(flashlight, forKey: .flashlight)
+        try container.encode(timePressureSettings, forKey: .timePressureSettings)
     }
 
     /// Memberwise initializer
@@ -87,7 +111,10 @@ struct AlarmSettings: Codable {
         warningNotificationOnKill: Bool,
         androidFullScreenIntent: Bool,
         allowAlarmOverlap: Bool,
-        iOSBackgroundAudio: Bool
+        iOSBackgroundAudio: Bool,
+        voiceTagSettings: VoiceTagSettings,
+        flashlight: Bool,
+        timePressureSettings: TimePressureSettings?
     ) {
         self.id = id
         self.dateTime = dateTime
@@ -100,6 +127,9 @@ struct AlarmSettings: Codable {
         self.androidFullScreenIntent = androidFullScreenIntent
         self.allowAlarmOverlap = allowAlarmOverlap
         self.iOSBackgroundAudio = iOSBackgroundAudio
+        self.voiceTagSettings = voiceTagSettings
+        self.flashlight = flashlight
+        self.timePressureSettings = timePressureSettings
     }
 
     /// Converts from wire model to `AlarmSettings`.
@@ -115,7 +145,10 @@ struct AlarmSettings: Codable {
             warningNotificationOnKill: wire.warningNotificationOnKill,
             androidFullScreenIntent: wire.androidFullScreenIntent,
             allowAlarmOverlap: wire.allowAlarmOverlap,
-            iOSBackgroundAudio: wire.iOSBackgroundAudio
+            iOSBackgroundAudio: wire.iOSBackgroundAudio,
+            voiceTagSettings: VoiceTagSettings.from(wire: wire.voiceTagSettings),
+            flashlight: wire.flashlight,
+            timePressureSettings: wire.timePressureSettings.map { TimePressureSettings.from(wire: $0) }
         )
     }
 }

@@ -124,6 +124,15 @@ public class AlarmApiImpl: NSObject, AlarmApi {
             alarm.audioPlayer = nil
             alarm.volumeEnforcementTimer?.invalidate()
             alarm.volumeEnforcementTimer = nil
+            // Clean up TTS service
+            alarm.ttsService?.cleanup()
+            alarm.ttsService = nil
+            // Clean up time announcement service
+            alarm.timeAnnouncementService?.cleanup()
+            alarm.timeAnnouncementService = nil
+            // Clean up flashlight service
+            alarm.flashlightService?.cleanup()
+            alarm.flashlightService = nil
         }
         self.alarms.removeAll()
 
@@ -157,7 +166,131 @@ public class AlarmApiImpl: NSObject, AlarmApi {
     }
 
     func disableWarningNotificationOnKill() throws {
-        throw PigeonError(code: String(AlarmErrorCode.pluginInternal.rawValue), message: "Method disableWarningNotificationOnKill not implemented", details: nil)
+        self.notificationTitleOnKill = nil
+        self.notificationBodyOnKill = nil
+        self.warningNotificationOnKill = false
+        if self.observerAdded {
+            NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
+            self.observerAdded = false
+        }
+    }
+
+    func editRingingAlarm(editRingingAlarmSettingsWire: EditRingingAlarmSettingsWire) throws {
+        let settings = EditRingingAlarmSettings.from(wire: editRingingAlarmSettingsWire)
+        let id = settings.id
+
+        guard let alarm = self.alarms[id] else {
+            NSLog("[SwiftAlarmPlugin] editRingingAlarm: Alarm with id \(id) not found")
+            return
+        }
+
+        NSLog("[SwiftAlarmPlugin] editRingingAlarm: Editing alarm with id \(id)")
+
+        // 1. Vibrate
+        if let vibrate = settings.vibrate {
+            if vibrate {
+                self.vibratingAlarms.insert(id)
+                if self.vibratingAlarms.count == 1 {
+                    self.triggerVibrations()
+                }
+            } else {
+                self.vibratingAlarms.remove(id)
+            }
+        }
+
+        // 2. Flashlight
+        if let flashlight = settings.flashlight {
+            if flashlight {
+                let flashlightService = alarm.flashlightService ?? FlashlightService()
+                flashlightService.turnOnFlashlight()
+                self.alarms[id]?.flashlightService = flashlightService
+            } else {
+                alarm.flashlightService?.turnOffFlashlight()
+            }
+        }
+
+        // 3. Audio / Volume
+        if let volumeSettings = settings.volumeSettings,
+           let assetAudioPath = settings.assetAudioPath,
+           let loopAudio = settings.loopAudio {
+            // Stop the current audio player
+            alarm.audioPlayer?.stop()
+
+            // Load new audio player
+            if let newAudioPlayer = self.loadAudioPlayer(withAsset: assetAudioPath, forId: id) {
+                if loopAudio {
+                    newAudioPlayer.numberOfLoops = -1
+                }
+                newAudioPlayer.prepareToPlay()
+                newAudioPlayer.volume = 1.0
+                newAudioPlayer.play()
+
+                self.alarms[id]?.audioPlayer = newAudioPlayer
+
+                // Set volume if specified
+                if let volumeValue = volumeSettings.volume {
+                    let targetVolume = Float(volumeValue)
+                    self.setVolume(volume: targetVolume, enable: true)
+                }
+
+                // Apply fade steps
+                if !volumeSettings.fadeSteps.isEmpty {
+                    self.fadeAlarmVolumeWithSteps(id: id, steps: volumeSettings.fadeSteps)
+                } else if let fadeDuration = volumeSettings.fadeDuration {
+                    self.fadeAlarmVolumeWithSteps(id: id, steps: [VolumeFadeStep(time: 0, volume: 0), VolumeFadeStep(time: fadeDuration, volume: 1.0)])
+                }
+
+                // Volume enforcement
+                alarm.volumeEnforcementTimer?.invalidate()
+                alarm.volumeEnforcementTimer = nil
+                if volumeSettings.volumeEnforced, let volumeValue = volumeSettings.volume {
+                    let targetVolume = Float(volumeValue)
+                    self.alarms[id]?.volumeEnforcementTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                        guard let self = self else { return }
+                        let currentSystemVolume = self.getSystemVolume()
+                        if abs(currentSystemVolume - targetVolume) > 0.01 {
+                            self.setVolume(volume: targetVolume, enable: false)
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Voice tag (TTS)
+        if let voiceTagSettings = settings.voiceTagSettings {
+            alarm.ttsService?.cleanup()
+            if voiceTagSettings.enable {
+                let ttsService = TTSService(
+                    text: voiceTagSettings.text,
+                    volume: voiceTagSettings.volume,
+                    speechRate: voiceTagSettings.speechRate,
+                    pitch: voiceTagSettings.pitch,
+                    loop: voiceTagSettings.loop,
+                    loopInterval: voiceTagSettings.loopInterval
+                )
+                self.alarms[id]?.ttsService = ttsService
+            } else {
+                self.alarms[id]?.ttsService = nil
+            }
+        }
+
+        // 5. Time pressure (time announcement)
+        if let timePressureSettings = settings.timePressureSettings {
+            alarm.timeAnnouncementService?.cleanup()
+            if timePressureSettings.enable {
+                let timeService = TimeAnnouncementService(
+                    volume: timePressureSettings.volume,
+                    speechRate: timePressureSettings.speechRate,
+                    pitch: timePressureSettings.pitch,
+                    loop: timePressureSettings.loop,
+                    loopInterval: timePressureSettings.loopInterval,
+                    languageTag: timePressureSettings.languageTag
+                )
+                self.alarms[id]?.timeAnnouncementService = timeService
+            } else {
+                self.alarms[id]?.timeAnnouncementService = nil
+            }
+        }
     }
 
     public func backgroundFetch() {
@@ -316,6 +449,39 @@ public class AlarmApiImpl: NSObject, AlarmApi {
             }
         }
 
+        // Start TTS voice tag if enabled
+        if alarm.settings.voiceTagSettings.enable {
+            let ttsService = TTSService(
+                text: alarm.settings.voiceTagSettings.text,
+                volume: alarm.settings.voiceTagSettings.volume,
+                speechRate: alarm.settings.voiceTagSettings.speechRate,
+                pitch: alarm.settings.voiceTagSettings.pitch,
+                loop: alarm.settings.voiceTagSettings.loop,
+                loopInterval: alarm.settings.voiceTagSettings.loopInterval
+            )
+            self.alarms[id]?.ttsService = ttsService
+        }
+
+        // Start time announcement if enabled
+        if let tpSettings = alarm.settings.timePressureSettings, tpSettings.enable {
+            let timeService = TimeAnnouncementService(
+                volume: tpSettings.volume,
+                speechRate: tpSettings.speechRate,
+                pitch: tpSettings.pitch,
+                loop: tpSettings.loop,
+                loopInterval: tpSettings.loopInterval,
+                languageTag: tpSettings.languageTag
+            )
+            self.alarms[id]?.timeAnnouncementService = timeService
+        }
+
+        // Turn on flashlight if enabled
+        if alarm.settings.flashlight {
+            let flashlightService = FlashlightService()
+            flashlightService.turnOnFlashlight()
+            self.alarms[id]?.flashlightService = flashlightService
+        }
+
         if !alarm.settings.loopAudio {
             let audioDuration = audioPlayer.duration
             DispatchQueue.main.asyncAfter(deadline: .now() + audioDuration.toDispatchInterval()) {
@@ -433,6 +599,12 @@ public class AlarmApiImpl: NSObject, AlarmApi {
             alarm.audioPlayer = nil
             alarm.volumeEnforcementTimer?.invalidate()
             alarm.volumeEnforcementTimer = nil
+            // Clean up TTS service
+            alarm.ttsService?.cleanup()
+            // Clean up time announcement service
+            alarm.timeAnnouncementService?.cleanup()
+            // Clean up flashlight service
+            alarm.flashlightService?.cleanup()
             self.alarms.removeValue(forKey: id)
         }
 
