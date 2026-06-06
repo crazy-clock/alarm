@@ -41,8 +41,12 @@ class TimeAnnouncementService: NSObject {
 
         // Set language based on languageTag
         if let tag = languageTag {
-            let locale = Locale(identifier: tag)
-            if let languageCode = locale.language.languageCode {
+            if #available(iOS 16, *) {
+                let locale = Locale(identifier: tag)
+                if locale.language.languageCode != nil {
+                    utterance.voice = AVSpeechSynthesisVoice(language: tag)
+                }
+            } else {
                 utterance.voice = AVSpeechSynthesisVoice(language: tag)
             }
         }
