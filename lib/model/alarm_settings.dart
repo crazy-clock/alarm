@@ -61,8 +61,26 @@ class AlarmSettings extends Equatable {
       // Default `allowAlarmOverlap` to false for v4
       json['allowAlarmOverlap'] = json['allowAlarmOverlap'] ?? false;
 
-      // Default `iOSBackgroundAudio` to true for v4
+          // Default `iOSBackgroundAudio` to true for v4
       json['iOSBackgroundAudio'] = json['iOSBackgroundAudio'] ?? true;
+
+      // Backward compatibility: ensure voiceTagSettings exists
+      if (!json.containsKey('voiceTagSettings')) {
+        json['voiceTagSettings'] = {
+          'enable': false,
+          'text': '',
+          'volume': 1.0,
+          'speechRate': 0.1,
+          'pitch': 1.0,
+          'loop': false,
+          'loopInterval': 1000,
+        };
+      }
+
+      // Backward compatibility: ensure flashlight exists
+      if (!json.containsKey('flashlight')) {
+        json['flashlight'] = false;
+      }
 
       // Convert dateTime to string so the default JSON parser can handle it
       final dateTimeValue = json['dateTime'];

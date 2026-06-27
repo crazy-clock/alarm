@@ -48,7 +48,9 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             let content = UNMutableNotificationContent()
             content.title = notificationSettings.title
             content.body = notificationSettings.body
-            content.sound = nil
+            // Use default sound so the notification still makes noise even if the app is killed.
+            // Note: iOS limits notification sounds to 30 seconds and cannot play custom audio files.
+            content.sound = UNNotificationSound.default
             content.userInfo = ["id": id]
 
             if let stopButtonTitle = notificationSettings.stopButton {
